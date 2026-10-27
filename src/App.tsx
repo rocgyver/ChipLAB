@@ -52,10 +52,13 @@ export default function App() {
   const [moves, setMoves] = useState<number>(0);
   const [history, setHistory] = useState<GameSnapshot[]>([]);
 
-  // Sound & CRT filter states
+  // Sound, CRT, & Ambient filter states
   const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
   const [isCrtOn, setIsCrtOn] = useState<boolean>(() => {
     return localStorage.getItem('lab_game_crt') === 'true';
+  });
+  const [isAmbientOn, setIsAmbientOn] = useState<boolean>(() => {
+    return localStorage.getItem('lab_game_ambient') !== 'false';
   });
 
   // Solved levels records in localStorage
@@ -445,6 +448,11 @@ export default function App() {
           e.preventDefault();
           setIsMuted(sounds.toggleMute());
           break;
+        case 'b':
+        case 'B':
+          e.preventDefault();
+          handleToggleAmbient();
+          break;
         case 'l':
         case 'L':
           e.preventDefault();
@@ -462,7 +470,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentLevel.hint, handleMove, handleReset, handleUndo]);
+  }, [currentLevel.hint, handleMove, handleReset, handleUndo, isAmbientOn]);
 
   const handleNextLevel = () => {
     const nextIdx = LEVELS.findIndex((l) => l.id === currentLevel.id) + 1;
@@ -475,6 +483,12 @@ export default function App() {
     const nextState = !isCrtOn;
     setIsCrtOn(nextState);
     localStorage.setItem('lab_game_crt', String(nextState));
+  };
+
+  const handleToggleAmbient = () => {
+    const nextState = !isAmbientOn;
+    setIsAmbientOn(nextState);
+    localStorage.setItem('lab_game_ambient', String(nextState));
   };
 
   const bestRecord = solvedLevels[currentLevel.id]?.bestMoves || null;
@@ -569,12 +583,14 @@ export default function App() {
           canUndo={history.length > 0}
           isMuted={isMuted}
           isCrtOn={isCrtOn}
+          isAmbientOn={isAmbientOn}
           bestMoves={bestRecord}
           remainingChipsCount={chips.length}
           onUndo={handleUndo}
           onReset={handleReset}
           onToggleSound={() => setIsMuted(sounds.toggleMute())}
           onToggleCrt={handleToggleCrt}
+          onToggleAmbient={handleToggleAmbient}
           onShowHint={() =>
             setHintMessage(currentLevel.hint || '運用滑動碰撞，將同級晶片結合！')
           }
@@ -622,6 +638,7 @@ export default function App() {
             isPushing={isPushing}
             isWalking={isWalking}
             isVictory={isVictory}
+            isAmbientOn={isAmbientOn}
             chips={chips}
             onTileClick={handleTileClick}
             onPush={handleMove}
@@ -654,6 +671,8 @@ export default function App() {
           <span className="hidden sm:inline">[R] 重試</span>
           <span className="hidden sm:inline">·</span>
           <span className="hidden sm:inline">[H] 提示</span>
+          <span className="hidden sm:inline">·</span>
+          <span className="hidden sm:inline">[B] 動畫開關</span>
         </div>
         <div className="flex items-center gap-2 text-slate-400">
           <span>博士任務：合成唯一超級電腦</span>

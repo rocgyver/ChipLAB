@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck } from 'lucide-react';
+import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck, Sparkles } from 'lucide-react';
 import { LevelData } from '../types/game';
 import { CHIP_DEFINITIONS } from '../data/chipEncyclopedia';
 
@@ -9,12 +9,14 @@ interface GameHUDProps {
   canUndo: boolean;
   isMuted: boolean;
   isCrtOn: boolean;
+  isAmbientOn: boolean;
   bestMoves: number | null;
   remainingChipsCount: number;
   onUndo: () => void;
   onReset: () => void;
   onToggleSound: () => void;
   onToggleCrt: () => void;
+  onToggleAmbient: () => void;
   onShowHint: () => void;
   onOpenSolution?: () => void;
   onOpenLevelSelect: () => void;
@@ -28,12 +30,14 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   canUndo,
   isMuted,
   isCrtOn,
+  isAmbientOn,
   bestMoves,
   remainingChipsCount,
   onUndo,
   onReset,
   onToggleSound,
   onToggleCrt,
+  onToggleAmbient,
   onShowHint,
   onOpenSolution,
   onOpenLevelSelect,
@@ -219,7 +223,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             type="button"
             onClick={onToggleCrt}
             title={`CRT 復古映像管濾鏡: ${isCrtOn ? '開啟' : '關閉'}`}
-            className={`px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-colors flex items-center ${
+            className={`px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-colors flex items-center cursor-pointer ${
               isCrtOn
                 ? 'bg-emerald-950/60 text-emerald-400 border-emerald-700/60'
                 : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -228,12 +232,26 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             <Monitor className="w-3.5 h-3.5" />
           </button>
 
+          {/* Ambient Scene Animation Toggle */}
+          <button
+            type="button"
+            onClick={onToggleAmbient}
+            title={`背景微粒與電路脈衝動畫: ${isAmbientOn ? '開啟' : '關閉'}`}
+            className={`px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-colors flex items-center cursor-pointer ${
+              isAmbientOn
+                ? 'bg-amber-950/60 text-amber-300 border-amber-700/60 shadow-xs'
+                : 'bg-slate-800 text-slate-500 border-slate-700'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+          </button>
+
           {/* Sound Toggle */}
           <button
             type="button"
             onClick={onToggleSound}
             title={`音效: ${isMuted ? '靜音' : '開啟'}`}
-            className="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95 transition-colors flex items-center"
+            className="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95 transition-colors flex items-center cursor-pointer"
           >
             {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
           </button>

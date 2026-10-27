@@ -42,21 +42,21 @@ export const LabAtmosphere: React.FC = () => {
     window.addEventListener('resize', handleResize);
 
     // Color palette: Phosphor Emerald, Cyan logic, Amber voltage
-    const colors = ['#34d399', '#38bdf8', '#fbbf24', '#a78bfa'];
+    const colors = ['#34d399', '#38bdf8', '#fbbf24'];
 
-    const PARTICLE_COUNT = 24;
+    const PARTICLE_COUNT = 12; // Reduced by half for a much cleaner, subtle look
     const particles: Particle[] = [];
 
     const createParticle = (): Particle => {
-      const maxLife = 180 + Math.random() * 240;
+      const maxLife = 200 + Math.random() * 260;
       return {
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.35,
-        vy: -0.2 - Math.random() * 0.35, // Gentle upward drift like energized digital dust
-        size: 0.8 + Math.random() * 1.5,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: -0.15 - Math.random() * 0.25, // Very gentle upward drift
+        size: 0.8 + Math.random() * 1.2,
         alpha: 0,
-        maxAlpha: 0.15 + Math.random() * 0.25,
+        maxAlpha: 0.12 + Math.random() * 0.18,
         life: 0,
         maxLife,
         color: colors[Math.floor(Math.random() * colors.length)],
@@ -121,35 +121,21 @@ export const LabAtmosphere: React.FC = () => {
     };
   }, []);
 
-  // Pre-defined geometric circuit bus paths along borders and corners
+  // Pre-defined geometric circuit bus paths along opposite corners (reduced to 2)
   const circuitLines: PulseLine[] = [
     {
       id: 1,
-      d: 'M 10 30 H 120 L 140 50 V 160 L 180 200 H 260',
-      duration: 3.5,
+      d: 'M 10 30 H 110 L 130 50 V 140 L 160 170 H 220',
+      duration: 4.8,
       delay: 0,
       color: '#34d399',
     },
     {
       id: 2,
-      d: 'M 500 20 H 420 L 390 50 H 330 V 120',
-      duration: 4.2,
-      delay: 1.8,
+      d: 'M 520 390 H 430 L 400 360 V 270 L 360 230',
+      duration: 5.4,
+      delay: 2.5,
       color: '#38bdf8',
-    },
-    {
-      id: 3,
-      d: 'M 30 380 V 320 L 60 290 H 180 L 210 260',
-      duration: 3.8,
-      delay: 0.9,
-      color: '#fbbf24',
-    },
-    {
-      id: 4,
-      d: 'M 520 400 H 440 L 410 370 V 280 L 370 240',
-      duration: 4.5,
-      delay: 2.4,
-      color: '#34d399',
     },
   ];
 
@@ -157,7 +143,7 @@ export const LabAtmosphere: React.FC = () => {
     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl z-5">
       {/* 1. Subtle SVG Circuit Traces & Animated Energy Pulses */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-25"
+        className="absolute inset-0 w-full h-full opacity-18"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 540 420"
         preserveAspectRatio="none"
@@ -210,14 +196,10 @@ export const LabAtmosphere: React.FC = () => {
         ))}
 
         {/* Small decorative circuit solder pads */}
-        <circle cx="10" cy="30" r="2.5" fill="#34d399" opacity="0.6" />
-        <circle cx="260" cy="200" r="2.5" fill="#34d399" opacity="0.6" />
-        <circle cx="500" cy="20" r="2.5" fill="#38bdf8" opacity="0.6" />
-        <circle cx="330" cy="120" r="2.5" fill="#38bdf8" opacity="0.6" />
-        <circle cx="30" cy="380" r="2.5" fill="#fbbf24" opacity="0.6" />
-        <circle cx="210" cy="260" r="2.5" fill="#fbbf24" opacity="0.6" />
-        <circle cx="520" cy="400" r="2.5" fill="#34d399" opacity="0.6" />
-        <circle cx="370" cy="240" r="2.5" fill="#34d399" opacity="0.6" />
+        <circle cx="10" cy="30" r="2.5" fill="#34d399" opacity="0.5" />
+        <circle cx="220" cy="170" r="2.5" fill="#34d399" opacity="0.5" />
+        <circle cx="520" cy="390" r="2.5" fill="#38bdf8" opacity="0.5" />
+        <circle cx="360" cy="230" r="2.5" fill="#38bdf8" opacity="0.5" />
       </svg>
 
       {/* 2. Floating Digital Dust Particles Canvas */}

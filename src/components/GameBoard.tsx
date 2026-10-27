@@ -14,6 +14,7 @@ interface GameBoardProps {
   isPushing: boolean;
   isWalking: boolean;
   isVictory: boolean;
+  isAmbientOn?: boolean;
   chips: Chip[];
   onTileClick: (x: number, y: number) => void;
   onPush: (dir: Direction) => void;
@@ -28,6 +29,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   isPushing,
   isWalking,
   isVictory,
+  isAmbientOn = true,
   chips,
   onTileClick,
   onPush,
@@ -79,8 +81,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       {/* Background Lab Grid Circuit Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
 
-      {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses */}
-      <LabAtmosphere />
+      {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses (Toggleable) */}
+      {isAmbientOn && <LabAtmosphere />}
 
       {/* Outer Lab Frame Decal */}
       <div className="absolute top-1 left-2 text-[9px] font-mono text-emerald-500/60 uppercase tracking-widest pointer-events-none">
