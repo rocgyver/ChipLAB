@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { CellType, Chip, Direction, Position } from '../types/game';
 import { EinsteinSprite } from './EinsteinSprite';
 import { ChipCard } from './ChipCard';
+import { LabAtmosphere } from './LabAtmosphere';
 import { calculatePush, getDirectionDelta } from '../utils/gameLogic';
 
 interface GameBoardProps {
@@ -77,6 +78,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     <div className="relative inline-block p-3 sm:p-5 rounded-2xl bg-slate-900 border-2 border-slate-700/80 shadow-2xl overflow-hidden max-w-full">
       {/* Background Lab Grid Circuit Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+
+      {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses */}
+      <LabAtmosphere />
 
       {/* Outer Lab Frame Decal */}
       <div className="absolute top-1 left-2 text-[9px] font-mono text-emerald-500/60 uppercase tracking-widest pointer-events-none">

@@ -22,3 +22,18 @@
     background: #475569;
   }
 }
+
+@keyframes circuitFlow {
+  0% {
+    stroke-dashoffset: 200;
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.85;
+  }
+  100% {
+    stroke-dashoffset: -200;
+    opacity: 0.2;
+  }
+}
+
