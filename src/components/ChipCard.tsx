@@ -70,33 +70,33 @@ export const ChipCard: React.FC<ChipCardProps> = ({
         </div>
 
         {/* Chip Body Core */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-1 z-10 w-full">
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-0.5 z-10 w-full min-h-0 overflow-hidden">
           {/* Level Badge */}
           <div
-            className="text-[9px] sm:text-[10px] font-bold tracking-wider px-1 py-0.2 rounded font-mono uppercase leading-none mb-0.5"
+            className="text-[7.5px] sm:text-[8.5px] font-bold tracking-tight px-1 py-0.2 rounded font-mono uppercase leading-none mb-0.5"
             style={{
               color: def.borderColor,
-              textShadow: `0 0 6px ${def.glowColor}`,
+              textShadow: `0 0 5px ${def.glowColor}`,
             }}
           >
             {isSupercomputer ? '★ SUPER ★' : `LV.${level}`}
           </div>
 
           {/* Chip Code Silkscreen */}
-          <div className="text-[10px] sm:text-[11px] font-black tracking-tight text-white/95 font-mono leading-none truncate max-w-full">
+          <div className="text-[8.5px] sm:text-[9.5px] font-black tracking-tight text-white font-mono leading-none truncate max-w-full">
             {def.code}
           </div>
 
-          {/* Micro Subtitle / Name */}
+          {/* Micro Subtitle / Short Name */}
           {showDetails && size !== 'compact' && (
-            <div className="text-[8px] text-white/70 tracking-tighter truncate max-w-[90%] mt-0.5">
-              {def.name.split(' ')[0]}
+            <div className="text-[6.5px] sm:text-[7.5px] text-white/80 font-sans tracking-tighter truncate max-w-full mt-0.5 leading-none">
+              {def.shortName || def.name.split(' ')[0]}
             </div>
           )}
         </div>
 
         {/* Bottom Silkscreen bar */}
-        <div className="w-full px-1 pb-0.5 flex items-center justify-between text-[7px] text-white/40 font-mono">
+        <div className="w-full px-1 pb-0.5 flex items-center justify-between text-[6px] sm:text-[6.5px] text-white/40 font-mono leading-none">
           <span>{def.pins}P</span>
           <span>{def.year}</span>
         </div>

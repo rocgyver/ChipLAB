@@ -53,6 +53,7 @@ export interface GameSnapshot {
 export interface ChipDefinition {
   level: number;
   name: string;
+  shortName?: string;
   code: string;
   year: string;
   specs: string;

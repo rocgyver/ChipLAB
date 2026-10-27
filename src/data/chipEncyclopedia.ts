@@ -4,7 +4,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   1: {
     level: 1,
     name: '7400 邏輯閘晶片',
-    code: 'SN7400N',
+    shortName: '7400閘',
+    code: '7400',
     year: '1964',
     specs: '4× 2-輸入 NAND 閘 · 14 支引腳',
     desc: '最基礎的 TTL 雙極性數位邏輯閘晶片。所有電腦架構的原子基石，由德州儀器開創標準。',
@@ -17,7 +18,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   2: {
     level: 2,
     name: '64K 靜態記憶體 (SRAM)',
-    code: 'HM6264P',
+    shortName: 'SRAM',
+    code: '6264',
     year: '1982',
     specs: '8K×8 Bit (64Kbit) · 28 支引腳',
     desc: '高速靜態隨機存取記憶體，為早期微型電腦與工控機箱提供暫存資料緩衝。',
@@ -30,7 +32,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   3: {
     level: 3,
     name: '8086 微處理器 CPU',
-    code: 'INTEL 8086',
+    shortName: '8086',
+    code: 'i8086',
     year: '1978',
     specs: '16 位元架構 · 29,000 電晶體 · 40 引腳',
     desc: '傳奇的 x86 架構開山鼻祖！開啟了 IBM PC 時代與微型電腦的黃金狂潮。',
@@ -43,7 +46,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   4: {
     level: 4,
     name: '80387 數學輔助運算器',
-    code: 'i80387DX',
+    shortName: '387FPU',
+    code: 'i80387',
     year: '1987',
     specs: '80 位元浮點運算 · 68 腳 PLCC 封裝',
     desc: '硬體等級的浮點數協同處理器，讓科學計算、3D 矩陣旋轉與工程模擬速度飆升十倍！',
@@ -56,7 +60,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   5: {
     level: 5,
     name: '486 DX2-66 高速處理器',
-    code: 'i486DX2',
+    shortName: '486DX',
+    code: 'i486',
     year: '1992',
     specs: '32 位元倍頻 · 120 萬電晶體 · 168 腳 PGA',
     desc: 'DOS 經典黃金時期的王牌晶片，整合一級快取與內建 FPU，流暢運行當時的 3D 與大型模擬。',
@@ -69,7 +74,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   6: {
     level: 6,
     name: '奔騰處理器 (Pentium MMX)',
-    code: 'P55C-200',
+    shortName: 'MMX',
+    code: 'P55C',
     year: '1997',
     specs: '超純量雙管線 · 450 萬電晶體 · 296 腳 SPGA',
     desc: '突破極限的多媒體延伸指令集（MMX），DOS 與 Windows 世代交替之際的傳奇巨作。',
@@ -82,7 +88,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   7: {
     level: 7,
     name: '量子神經運算單元 (QPU)',
-    code: 'NEURAL-Q1',
+    shortName: '量子核',
+    code: 'QPU-1',
     year: '2026',
     specs: '1024 量子位元糾纏核 · 光子超導匯流排',
     desc: '超導量子處理器，以量子疊加態秒殺傳統複雜拓撲運算與龐大數據矩陣。',
@@ -95,7 +102,8 @@ export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
   8: {
     level: 8,
     name: '終極超級電腦 (Supercomputer)',
-    code: 'TITAN-MAX-1',
+    shortName: '超電腦',
+    code: 'TITAN',
     year: '巔峰',
     specs: 'ExaFLOPS 級算力 · 晶片合成的終極形態',
     desc: '由愛因斯坦博士在實驗室歷經百轉千迴、推動無數晶片後所凝聚出的終極超級電腦！',
