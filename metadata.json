@@ -1,0 +1,6 @@
+{
+  "name": "LAB - 經典 MS-DOS 晶片推牌益智遊戲",
+  "description": "經典 MS-DOS 益智遊戲《LAB》（推牌）高畫質復刻版。操控愛因斯坦博士推動、滑動並合成 IC 晶片，最終合成為超級電腦！支援復古 CRT 效果、音效、關卡挑戰與自製關卡。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

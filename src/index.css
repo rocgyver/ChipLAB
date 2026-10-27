@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@layer utilities {
+  /* CRT Monitor Glow Filter */
+  .crt-active {
+    text-shadow: 0 0 1px rgba(74, 222, 128, 0.4);
+  }
+
+  /* Custom subtle scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #090d16;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
+}

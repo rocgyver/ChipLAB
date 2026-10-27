@@ -1,0 +1,108 @@
+import { ChipDefinition } from '../types/game';
+
+export const CHIP_DEFINITIONS: Record<number, ChipDefinition> = {
+  1: {
+    level: 1,
+    name: '7400 邏輯閘晶片',
+    code: 'SN7400N',
+    year: '1964',
+    specs: '4× 2-輸入 NAND 閘 · 14 支引腳',
+    desc: '最基礎的 TTL 雙極性數位邏輯閘晶片。所有電腦架構的原子基石，由德州儀器開創標準。',
+    pins: 14,
+    color: '#0284c7', // sky-600
+    borderColor: '#38bdf8',
+    glowColor: 'rgba(56, 189, 248, 0.4)',
+    bgGradient: 'linear-gradient(135deg, #0f172a 0%, #0369a1 100%)',
+  },
+  2: {
+    level: 2,
+    name: '64K 靜態記憶體 (SRAM)',
+    code: 'HM6264P',
+    year: '1982',
+    specs: '8K×8 Bit (64Kbit) · 28 支引腳',
+    desc: '高速靜態隨機存取記憶體，為早期微型電腦與工控機箱提供暫存資料緩衝。',
+    pins: 28,
+    color: '#16a34a', // green-600
+    borderColor: '#4ade80',
+    glowColor: 'rgba(74, 222, 128, 0.4)',
+    bgGradient: 'linear-gradient(135deg, #052e16 0%, #15803d 100%)',
+  },
+  3: {
+    level: 3,
+    name: '8086 微處理器 CPU',
+    code: 'INTEL 8086',
+    year: '1978',
+    specs: '16 位元架構 · 29,000 電晶體 · 40 引腳',
+    desc: '傳奇的 x86 架構開山鼻祖！開啟了 IBM PC 時代與微型電腦的黃金狂潮。',
+    pins: 40,
+    color: '#ca8a04', // yellow-600 / gold
+    borderColor: '#facc15',
+    glowColor: 'rgba(250, 204, 21, 0.4)',
+    bgGradient: 'linear-gradient(135deg, #2e2605 0%, #a16207 100%)',
+  },
+  4: {
+    level: 4,
+    name: '80387 數學輔助運算器',
+    code: 'i80387DX',
+    year: '1987',
+    specs: '80 位元浮點運算 · 68 腳 PLCC 封裝',
+    desc: '硬體等級的浮點數協同處理器，讓科學計算、3D 矩陣旋轉與工程模擬速度飆升十倍！',
+    pins: 68,
+    color: '#9333ea', // purple-600
+    borderColor: '#c084fc',
+    glowColor: 'rgba(192, 132, 252, 0.45)',
+    bgGradient: 'linear-gradient(135deg, #2e1065 0%, #7e22ce 100%)',
+  },
+  5: {
+    level: 5,
+    name: '486 DX2-66 高速處理器',
+    code: 'i486DX2',
+    year: '1992',
+    specs: '32 位元倍頻 · 120 萬電晶體 · 168 腳 PGA',
+    desc: 'DOS 經典黃金時期的王牌晶片，整合一級快取與內建 FPU，流暢運行當時的 3D 與大型模擬。',
+    pins: 168,
+    color: '#ea580c', // orange-600
+    borderColor: '#fb923c',
+    glowColor: 'rgba(251, 146, 60, 0.45)',
+    bgGradient: 'linear-gradient(135deg, #431407 0%, #c2410c 100%)',
+  },
+  6: {
+    level: 6,
+    name: '奔騰處理器 (Pentium MMX)',
+    code: 'P55C-200',
+    year: '1997',
+    specs: '超純量雙管線 · 450 萬電晶體 · 296 腳 SPGA',
+    desc: '突破極限的多媒體延伸指令集（MMX），DOS 與 Windows 世代交替之際的傳奇巨作。',
+    pins: 296,
+    color: '#e11d48', // rose-600
+    borderColor: '#fb7185',
+    glowColor: 'rgba(251, 113, 133, 0.5)',
+    bgGradient: 'linear-gradient(135deg, #4c0519 0%, #be123c 100%)',
+  },
+  7: {
+    level: 7,
+    name: '量子神經運算單元 (QPU)',
+    code: 'NEURAL-Q1',
+    year: '2026',
+    specs: '1024 量子位元糾纏核 · 光子超導匯流排',
+    desc: '超導量子處理器，以量子疊加態秒殺傳統複雜拓撲運算與龐大數據矩陣。',
+    pins: 512,
+    color: '#06b6d4', // cyan-500
+    borderColor: '#67e8f9',
+    glowColor: 'rgba(103, 232, 249, 0.6)',
+    bgGradient: 'linear-gradient(135deg, #083344 0%, #0e7490 100%)',
+  },
+  8: {
+    level: 8,
+    name: '終極超級電腦 (Supercomputer)',
+    code: 'TITAN-MAX-1',
+    year: '巔峰',
+    specs: 'ExaFLOPS 級算力 · 晶片合成的終極形態',
+    desc: '由愛因斯坦博士在實驗室歷經百轉千迴、推動無數晶片後所凝聚出的終極超級電腦！',
+    pins: 1024,
+    color: '#eab308', // pure gold
+    borderColor: '#fef08a',
+    glowColor: 'rgba(254, 240, 138, 0.7)',
+    bgGradient: 'linear-gradient(135deg, #422006 0%, #b45309 50%, #f59e0b 100%)',
+  },
+};
