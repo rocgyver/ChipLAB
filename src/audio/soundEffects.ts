@@ -201,6 +201,64 @@ class SoundSystem {
       // Audio error safety
     }
   }
+
+  public playTick() {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(950, this.ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, this.ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.035);
+    } catch {
+      // Audio safety
+    }
+  }
+
+  public playTimeOver() {
+    if (this.isMuted) return;
+    try {
+      this.initCtx();
+      if (!this.ctx) return;
+
+      // Two-tone descending hazard buzzer
+      const tones = [
+        { f: 220, t: 0, d: 0.18 },
+        { f: 180, t: 0.16, d: 0.18 },
+        { f: 140, t: 0.32, d: 0.3 },
+      ];
+
+      tones.forEach(({ f, t, d }) => {
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(f, this.ctx.currentTime + t);
+
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime + t);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + t + d);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(this.ctx.currentTime + t);
+        osc.stop(this.ctx.currentTime + t + d + 0.02);
+      });
+    } catch {
+      // Audio safety
+    }
+  }
 }
 
 export const sounds = new SoundSystem();

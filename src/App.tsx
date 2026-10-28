@@ -25,8 +25,11 @@ import { LevelEditorModal } from './components/LevelEditorModal';
 import { WinModal } from './components/WinModal';
 import { HelpModal } from './components/HelpModal';
 import { SolutionModal } from './components/SolutionModal';
+import { TimeOverModal } from './components/TimeOverModal';
 import { BoardThemeId, BOARD_THEMES, THEME_CYCLE_ORDER, DEFAULT_THEME_ID } from './types/theme';
 import { Cpu, Terminal, Sparkles, HelpCircle, ShieldCheck } from 'lucide-react';
+
+const getLevelTimeLimit = (lvl: LevelData) => Math.max(25, lvl.parMoves * 6 + 15);
 
 export default function App() {
   // Current active level
@@ -66,6 +69,13 @@ export default function App() {
     return saved && BOARD_THEMES[saved] ? saved : DEFAULT_THEME_ID;
   });
 
+  // Timed Challenge Mode
+  const [isTimedMode, setIsTimedMode] = useState<boolean>(() => {
+    return localStorage.getItem('lab_game_timed_mode') === 'true';
+  });
+  const [timeLeft, setTimeLeft] = useState<number>(() => getLevelTimeLimit(LEVELS[0]));
+  const [isTimeOver, setIsTimeOver] = useState<boolean>(false);
+
   const handleCycleTheme = useCallback(() => {
     setCurrentThemeId((prev) => {
       const idx = THEME_CYCLE_ORDER.indexOf(prev);
@@ -75,6 +85,17 @@ export default function App() {
       return next;
     });
   }, []);
+
+  const handleToggleTimedMode = useCallback(() => {
+    setIsTimedMode((prev) => {
+      const next = !prev;
+      localStorage.setItem('lab_game_timed_mode', String(next));
+      setTimeLeft(getLevelTimeLimit(currentLevel));
+      setIsTimeOver(false);
+      sounds.playStep();
+      return next;
+    });
+  }, [currentLevel]);
 
   // Solved levels records in localStorage
   const [solvedLevels, setSolvedLevels] = useState<
@@ -112,6 +133,8 @@ export default function App() {
     setIsPushing(false);
     setIsWalking(false);
     setHintMessage(null);
+    setTimeLeft(getLevelTimeLimit(lvl));
+    setIsTimeOver(false);
     setChips(
       lvl.chips.map((c, i) => ({
         id: `chip-${lvl.id}-${i}-${Date.now()}`,
@@ -145,10 +168,42 @@ export default function App() {
     }
   }, [isVictory, currentLevel, moves]);
 
+  // Timed challenge countdown effect
+  useEffect(() => {
+    if (!isTimedMode || isVictory || isTimeOver || isAutoPlaying) return;
+    if (isLevelSelectOpen || isEncyclopediaOpen || isEditorOpen || isHelpOpen || isSolutionModalOpen) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setIsTimeOver(true);
+          sounds.playTimeOver();
+          return 0;
+        }
+        if (prev <= 6) {
+          sounds.playTick();
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [
+    isTimedMode,
+    isVictory,
+    isTimeOver,
+    isAutoPlaying,
+    isLevelSelectOpen,
+    isEncyclopediaOpen,
+    isEditorOpen,
+    isHelpOpen,
+    isSolutionModalOpen,
+  ]);
+
   // Core movement & push handler
   const handleMove = useCallback(
     (dir: Direction) => {
-      if (isBusyRef.current || isVictory) return;
+      if (isBusyRef.current || isVictory || isTimeOver) return;
 
       const { dx, dy } = getDirectionDelta(dir);
       setPlayerDir(dir);
@@ -345,7 +400,7 @@ export default function App() {
   // Click on tile (Pathfinding to walk or direct push)
   const handleTileClick = useCallback(
     (tx: number, ty: number) => {
-      if (isBusyRef.current || isVictory) return;
+      if (isBusyRef.current || isVictory || isTimeOver) return;
 
       // Check if clicking directly adjacent chip in front of Einstein
       const frontX = playerPos.x;
@@ -473,6 +528,11 @@ export default function App() {
           e.preventDefault();
           handleCycleTheme();
           break;
+        case 'c':
+        case 'C':
+          e.preventDefault();
+          handleToggleTimedMode();
+          break;
         case 'l':
         case 'L':
           e.preventDefault();
@@ -490,7 +550,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentLevel.hint, handleCycleTheme, handleMove, handleReset, handleUndo, isAmbientOn]);
+  }, [currentLevel.hint, handleCycleTheme, handleMove, handleReset, handleToggleTimedMode, handleUndo, isAmbientOn]);
 
   const handleNextLevel = () => {
     const nextIdx = LEVELS.findIndex((l) => l.id === currentLevel.id) + 1;
@@ -604,6 +664,8 @@ export default function App() {
           isMuted={isMuted}
           isCrtOn={isCrtOn}
           isAmbientOn={isAmbientOn}
+          isTimedMode={isTimedMode}
+          timeLeft={timeLeft}
           currentThemeId={currentThemeId}
           bestMoves={bestRecord}
           remainingChipsCount={chips.length}
@@ -612,6 +674,7 @@ export default function App() {
           onToggleSound={() => setIsMuted(sounds.toggleMute())}
           onToggleCrt={handleToggleCrt}
           onToggleAmbient={handleToggleAmbient}
+          onToggleTimedMode={handleToggleTimedMode}
           onCycleTheme={handleCycleTheme}
           onShowHint={() =>
             setHintMessage(currentLevel.hint || '運用滑動碰撞，將同級晶片結合！')
@@ -698,6 +761,8 @@ export default function App() {
           <span className="hidden sm:inline">[B] 動畫</span>
           <span className="hidden sm:inline">·</span>
           <span className="hidden sm:inline">[T] 主題色</span>
+          <span className="hidden sm:inline">·</span>
+          <span className="hidden sm:inline">[C] 限時挑戰</span>
         </div>
         <div className="flex items-center gap-2 text-slate-400">
           <span>博士任務：合成唯一超級電腦</span>
@@ -710,6 +775,7 @@ export default function App() {
           level={currentLevel}
           moves={moves}
           bestMoves={bestRecord}
+          timeLeft={isTimedMode ? timeLeft : undefined}
           hasNextLevel={currentLevel.id < 24}
           onNextLevel={handleNextLevel}
           onReplay={handleReset}
@@ -750,6 +816,19 @@ export default function App() {
           level={currentLevel}
           onAutoPlay={handleAutoPlaySolution}
           onClose={() => setIsSolutionModalOpen(false)}
+        />
+      )}
+
+      {isTimeOver && (
+        <TimeOverModal
+          level={currentLevel}
+          onRetry={handleReset}
+          onExitTimedMode={() => {
+            setIsTimedMode(false);
+            localStorage.setItem('lab_game_timed_mode', 'false');
+            setIsTimeOver(false);
+            handleReset();
+          }}
         />
       )}
     </div>

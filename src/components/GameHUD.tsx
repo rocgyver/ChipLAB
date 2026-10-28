@@ -1,5 +1,5 @@
 import React from 'react';
-import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck, Sparkles, Palette } from 'lucide-react';
+import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck, Sparkles, Palette, Timer } from 'lucide-react';
 import { LevelData } from '../types/game';
 import { CHIP_DEFINITIONS } from '../data/chipEncyclopedia';
 import { BoardThemeId, BOARD_THEMES } from '../types/theme';
@@ -11,6 +11,8 @@ interface GameHUDProps {
   isMuted: boolean;
   isCrtOn: boolean;
   isAmbientOn: boolean;
+  isTimedMode?: boolean;
+  timeLeft?: number;
   currentThemeId: BoardThemeId;
   bestMoves: number | null;
   remainingChipsCount: number;
@@ -19,6 +21,7 @@ interface GameHUDProps {
   onToggleSound: () => void;
   onToggleCrt: () => void;
   onToggleAmbient: () => void;
+  onToggleTimedMode?: () => void;
   onCycleTheme: () => void;
   onShowHint: () => void;
   onOpenSolution?: () => void;
@@ -34,6 +37,8 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   isMuted,
   isCrtOn,
   isAmbientOn,
+  isTimedMode = false,
+  timeLeft,
   currentThemeId,
   bestMoves,
   remainingChipsCount,
@@ -42,6 +47,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   onToggleSound,
   onToggleCrt,
   onToggleAmbient,
+  onToggleTimedMode,
   onCycleTheme,
   onShowHint,
   onOpenSolution,
@@ -126,6 +132,25 @@ export const GameHUD: React.FC<GameHUDProps> = ({
               </span>
             ))}
           </div>
+
+          {/* Timed Mode Countdown Badge */}
+          {isTimedMode && timeLeft !== undefined && (
+            <div
+              title="限時挑戰倒數"
+              className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg border font-mono text-xs transition-colors ${
+                timeLeft <= 10
+                  ? 'bg-rose-950/85 border-rose-500 text-rose-300 animate-pulse font-black shadow-xs ring-1 ring-rose-500/40'
+                  : timeLeft <= 20
+                  ? 'bg-amber-950/70 border-amber-500/70 text-amber-300 font-bold'
+                  : 'bg-slate-950 border-slate-700 text-sky-300'
+              }`}
+            >
+              <Timer className={`w-3.5 h-3.5 ${timeLeft <= 10 ? 'text-rose-400 animate-bounce' : 'text-sky-400'}`} />
+              <span className="tabular-nums font-bold">
+                {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+              </span>
+            </div>
+          )}
 
           <div className="hidden sm:flex items-center gap-1 text-slate-400">
             <span>剩餘晶片:</span>
@@ -252,19 +277,31 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             <Sparkles className="w-3.5 h-3.5" />
           </button>
 
-          {/* Board Theme Switcher Button */}
+          {/* Board Theme Switcher Button (Compact, Palette icon with theme color) */}
           <button
             type="button"
             onClick={onCycleTheme}
             title={`切換棋盤主題: 目前為 ${currentThemeConfig.name} (點擊切換，快捷鍵: T)`}
-            className="px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer bg-slate-800 hover:bg-slate-700 border-slate-700"
+            className="px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-all flex items-center cursor-pointer bg-slate-800 hover:bg-slate-700 border-slate-700"
           >
             <Palette className="w-3.5 h-3.5" style={{ color: currentThemeConfig.previewColor }} />
-            <span
-              className="w-2 h-2 rounded-full ring-1 ring-white/30"
-              style={{ backgroundColor: currentThemeConfig.previewColor }}
-            />
           </button>
+
+          {/* Timed Challenge Mode Toggle */}
+          {onToggleTimedMode && (
+            <button
+              type="button"
+              onClick={onToggleTimedMode}
+              title={`限時挑戰模式: ${isTimedMode ? '開啟 (挑戰進行中)' : '關閉 (休閒解謎)'}`}
+              className={`px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-all flex items-center cursor-pointer ${
+                isTimedMode
+                  ? 'bg-rose-950/80 text-rose-300 border-rose-600 shadow-xs ring-1 ring-rose-500/40'
+                  : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+              }`}
+            >
+              <Timer className="w-3.5 h-3.5" />
+            </button>
+          )}
 
           {/* Sound Toggle */}
           <button

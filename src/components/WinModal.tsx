@@ -9,6 +9,7 @@ interface WinModalProps {
   level: LevelData;
   moves: number;
   bestMoves: number | null;
+  timeLeft?: number;
   hasNextLevel: boolean;
   onNextLevel: () => void;
   onReplay: () => void;
@@ -19,6 +20,7 @@ export const WinModal: React.FC<WinModalProps> = ({
   level,
   moves,
   bestMoves,
+  timeLeft,
   hasNextLevel,
   onNextLevel,
   onReplay,
@@ -109,6 +111,14 @@ export const WinModal: React.FC<WinModalProps> = ({
             </span>
           </div>
         </div>
+
+        {/* Timed Mode Success Bonus Notice */}
+        {timeLeft !== undefined && (
+          <div className="w-full py-1.5 px-3 mb-3 rounded-lg bg-rose-950/60 border border-rose-600/50 flex items-center justify-between text-xs font-mono text-rose-300">
+            <span>⏱️ 限時挑戰成功</span>
+            <span className="font-bold text-rose-200 tabular-nums">剩餘 {timeLeft} 秒</span>
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="w-full flex flex-col gap-2">
