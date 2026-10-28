@@ -25,6 +25,7 @@ import { LevelEditorModal } from './components/LevelEditorModal';
 import { WinModal } from './components/WinModal';
 import { HelpModal } from './components/HelpModal';
 import { SolutionModal } from './components/SolutionModal';
+import { BoardThemeId, BOARD_THEMES, THEME_CYCLE_ORDER, DEFAULT_THEME_ID } from './types/theme';
 import { Cpu, Terminal, Sparkles, HelpCircle, ShieldCheck } from 'lucide-react';
 
 export default function App() {
@@ -52,7 +53,7 @@ export default function App() {
   const [moves, setMoves] = useState<number>(0);
   const [history, setHistory] = useState<GameSnapshot[]>([]);
 
-  // Sound, CRT, & Ambient filter states
+  // Sound, CRT, Ambient & Theme states
   const [isMuted, setIsMuted] = useState<boolean>(() => sounds.getMuted());
   const [isCrtOn, setIsCrtOn] = useState<boolean>(() => {
     return localStorage.getItem('lab_game_crt') === 'true';
@@ -60,6 +61,20 @@ export default function App() {
   const [isAmbientOn, setIsAmbientOn] = useState<boolean>(() => {
     return localStorage.getItem('lab_game_ambient') !== 'false';
   });
+  const [currentThemeId, setCurrentThemeId] = useState<BoardThemeId>(() => {
+    const saved = localStorage.getItem('lab_game_theme') as BoardThemeId;
+    return saved && BOARD_THEMES[saved] ? saved : DEFAULT_THEME_ID;
+  });
+
+  const handleCycleTheme = useCallback(() => {
+    setCurrentThemeId((prev) => {
+      const idx = THEME_CYCLE_ORDER.indexOf(prev);
+      const next = THEME_CYCLE_ORDER[(idx + 1) % THEME_CYCLE_ORDER.length];
+      localStorage.setItem('lab_game_theme', next);
+      sounds.playStep();
+      return next;
+    });
+  }, []);
 
   // Solved levels records in localStorage
   const [solvedLevels, setSolvedLevels] = useState<
@@ -453,6 +468,11 @@ export default function App() {
           e.preventDefault();
           handleToggleAmbient();
           break;
+        case 't':
+        case 'T':
+          e.preventDefault();
+          handleCycleTheme();
+          break;
         case 'l':
         case 'L':
           e.preventDefault();
@@ -470,7 +490,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentLevel.hint, handleMove, handleReset, handleUndo, isAmbientOn]);
+  }, [currentLevel.hint, handleCycleTheme, handleMove, handleReset, handleUndo, isAmbientOn]);
 
   const handleNextLevel = () => {
     const nextIdx = LEVELS.findIndex((l) => l.id === currentLevel.id) + 1;
@@ -584,6 +604,7 @@ export default function App() {
           isMuted={isMuted}
           isCrtOn={isCrtOn}
           isAmbientOn={isAmbientOn}
+          currentThemeId={currentThemeId}
           bestMoves={bestRecord}
           remainingChipsCount={chips.length}
           onUndo={handleUndo}
@@ -591,6 +612,7 @@ export default function App() {
           onToggleSound={() => setIsMuted(sounds.toggleMute())}
           onToggleCrt={handleToggleCrt}
           onToggleAmbient={handleToggleAmbient}
+          onCycleTheme={handleCycleTheme}
           onShowHint={() =>
             setHintMessage(currentLevel.hint || '運用滑動碰撞，將同級晶片結合！')
           }
@@ -639,6 +661,7 @@ export default function App() {
             isWalking={isWalking}
             isVictory={isVictory}
             isAmbientOn={isAmbientOn}
+            theme={BOARD_THEMES[currentThemeId]}
             chips={chips}
             onTileClick={handleTileClick}
             onPush={handleMove}
@@ -672,7 +695,9 @@ export default function App() {
           <span className="hidden sm:inline">·</span>
           <span className="hidden sm:inline">[H] 提示</span>
           <span className="hidden sm:inline">·</span>
-          <span className="hidden sm:inline">[B] 動畫開關</span>
+          <span className="hidden sm:inline">[B] 動畫</span>
+          <span className="hidden sm:inline">·</span>
+          <span className="hidden sm:inline">[T] 主題色</span>
         </div>
         <div className="flex items-center gap-2 text-slate-400">
           <span>博士任務：合成唯一超級電腦</span>

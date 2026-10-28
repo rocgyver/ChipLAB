@@ -1,7 +1,8 @@
 import React from 'react';
-import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck, Sparkles } from 'lucide-react';
+import { RotateCcw, Undo2, Lightbulb, MapPin, Volume2, VolumeX, Monitor, BookOpen, Edit3, ShieldCheck, Sparkles, Palette } from 'lucide-react';
 import { LevelData } from '../types/game';
 import { CHIP_DEFINITIONS } from '../data/chipEncyclopedia';
+import { BoardThemeId, BOARD_THEMES } from '../types/theme';
 
 interface GameHUDProps {
   currentLevel: LevelData;
@@ -10,6 +11,7 @@ interface GameHUDProps {
   isMuted: boolean;
   isCrtOn: boolean;
   isAmbientOn: boolean;
+  currentThemeId: BoardThemeId;
   bestMoves: number | null;
   remainingChipsCount: number;
   onUndo: () => void;
@@ -17,6 +19,7 @@ interface GameHUDProps {
   onToggleSound: () => void;
   onToggleCrt: () => void;
   onToggleAmbient: () => void;
+  onCycleTheme: () => void;
   onShowHint: () => void;
   onOpenSolution?: () => void;
   onOpenLevelSelect: () => void;
@@ -31,6 +34,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   isMuted,
   isCrtOn,
   isAmbientOn,
+  currentThemeId,
   bestMoves,
   remainingChipsCount,
   onUndo,
@@ -38,12 +42,14 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   onToggleSound,
   onToggleCrt,
   onToggleAmbient,
+  onCycleTheme,
   onShowHint,
   onOpenSolution,
   onOpenLevelSelect,
   onOpenEncyclopedia,
   onOpenEditor,
 }) => {
+  const currentThemeConfig = BOARD_THEMES[currentThemeId] || BOARD_THEMES['Cyber Green'];
   const targetChipDef = CHIP_DEFINITIONS[currentLevel.targetLevel] || CHIP_DEFINITIONS[8];
 
   // Calculate stars performance indicator based on par moves
@@ -244,6 +250,20 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Board Theme Switcher Button */}
+          <button
+            type="button"
+            onClick={onCycleTheme}
+            title={`切換棋盤主題: 目前為 ${currentThemeConfig.name} (點擊切換，快捷鍵: T)`}
+            className="px-2 py-1.5 rounded-lg text-xs font-medium border active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer bg-slate-800 hover:bg-slate-700 border-slate-700"
+          >
+            <Palette className="w-3.5 h-3.5" style={{ color: currentThemeConfig.previewColor }} />
+            <span
+              className="w-2 h-2 rounded-full ring-1 ring-white/30"
+              style={{ backgroundColor: currentThemeConfig.previewColor }}
+            />
           </button>
 
           {/* Sound Toggle */}

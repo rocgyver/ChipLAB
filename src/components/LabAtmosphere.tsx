@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { BoardThemeConfig, BOARD_THEMES } from '../types/theme';
 
 interface Particle {
   x: number;
@@ -21,7 +22,13 @@ interface PulseLine {
   color: string;
 }
 
-export const LabAtmosphere: React.FC = () => {
+interface LabAtmosphereProps {
+  theme?: BoardThemeConfig;
+}
+
+export const LabAtmosphere: React.FC<LabAtmosphereProps> = ({
+  theme = BOARD_THEMES['Cyber Green'],
+}) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
@@ -41,10 +48,8 @@ export const LabAtmosphere: React.FC = () => {
     };
     window.addEventListener('resize', handleResize);
 
-    // Color palette: Phosphor Emerald, Cyan logic, Amber voltage
-    const colors = ['#34d399', '#38bdf8', '#fbbf24'];
-
-    const PARTICLE_COUNT = 12; // Reduced by half for a much cleaner, subtle look
+    const colors = theme.particleColors;
+    const PARTICLE_COUNT = 12; // Subtle & clean
     const particles: Particle[] = [];
 
     const createParticle = (): Particle => {
@@ -53,7 +58,7 @@ export const LabAtmosphere: React.FC = () => {
         x: Math.random() * width,
         y: Math.random() * height,
         vx: (Math.random() - 0.5) * 0.25,
-        vy: -0.15 - Math.random() * 0.25, // Very gentle upward drift
+        vy: -0.15 - Math.random() * 0.25, // Gentle upward drift
         size: 0.8 + Math.random() * 1.2,
         alpha: 0,
         maxAlpha: 0.12 + Math.random() * 0.18,
@@ -65,7 +70,7 @@ export const LabAtmosphere: React.FC = () => {
 
     for (let i = 0; i < PARTICLE_COUNT; i++) {
       const p = createParticle();
-      p.life = Math.random() * p.maxLife; // Stagger lifecycle
+      p.life = Math.random() * p.maxLife;
       particles.push(p);
     }
 
@@ -78,13 +83,11 @@ export const LabAtmosphere: React.FC = () => {
         p.x += p.vx;
         p.y += p.vy;
 
-        // Wrap or respawn
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
         if (p.y > height) p.y = 0;
 
-        // Fade in and fade out curve
         const halfLife = p.maxLife / 2;
         if (p.life < halfLife) {
           p.alpha = (p.life / halfLife) * p.maxAlpha;
@@ -97,7 +100,6 @@ export const LabAtmosphere: React.FC = () => {
           continue;
         }
 
-        // Draw particle with subtle soft glow
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fillStyle = p.color;
@@ -119,57 +121,42 @@ export const LabAtmosphere: React.FC = () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
     };
-  }, []);
+  }, [theme]);
 
-  // Pre-defined geometric circuit bus paths along opposite corners (reduced to 2)
   const circuitLines: PulseLine[] = [
     {
       id: 1,
       d: 'M 10 30 H 110 L 130 50 V 140 L 160 170 H 220',
       duration: 4.8,
       delay: 0,
-      color: '#34d399',
+      color: theme.circuitLineColor1,
     },
     {
       id: 2,
       d: 'M 520 390 H 430 L 400 360 V 270 L 360 230',
       duration: 5.4,
       delay: 2.5,
-      color: '#38bdf8',
+      color: theme.circuitLineColor2,
     },
   ];
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl z-5">
-      {/* 1. Subtle SVG Circuit Traces & Animated Energy Pulses */}
+      {/* 1. Dynamic SVG Circuit Traces & Animated Energy Pulses */}
       <svg
-        className="absolute inset-0 w-full h-full opacity-18"
+        className="absolute inset-0 w-full h-full opacity-20"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 540 420"
         preserveAspectRatio="none"
       >
-        <defs>
-          <linearGradient id="grad-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#059669" stopOpacity="0.2" />
-          </linearGradient>
-          <linearGradient id="grad-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#0284c7" stopOpacity="0.2" />
-          </linearGradient>
-          <linearGradient id="grad-amber" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#d97706" stopOpacity="0.2" />
-          </linearGradient>
-        </defs>
-
-        {/* Static Base Circuit Tracks */}
+        {/* Base Circuit Tracks */}
         {circuitLines.map((line) => (
           <path
             key={`base-${line.id}`}
             d={line.d}
             fill="none"
-            stroke="#1e293b"
+            stroke="currentColor"
+            className="text-slate-800/80"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -195,11 +182,11 @@ export const LabAtmosphere: React.FC = () => {
           />
         ))}
 
-        {/* Small decorative circuit solder pads */}
-        <circle cx="10" cy="30" r="2.5" fill="#34d399" opacity="0.5" />
-        <circle cx="220" cy="170" r="2.5" fill="#34d399" opacity="0.5" />
-        <circle cx="520" cy="390" r="2.5" fill="#38bdf8" opacity="0.5" />
-        <circle cx="360" cy="230" r="2.5" fill="#38bdf8" opacity="0.5" />
+        {/* Decorative circuit solder pads */}
+        <circle cx="10" cy="30" r="2.5" fill={theme.circuitLineColor1} opacity="0.6" />
+        <circle cx="220" cy="170" r="2.5" fill={theme.circuitLineColor1} opacity="0.6" />
+        <circle cx="520" cy="390" r="2.5" fill={theme.circuitLineColor2} opacity="0.6" />
+        <circle cx="360" cy="230" r="2.5" fill={theme.circuitLineColor2} opacity="0.6" />
       </svg>
 
       {/* 2. Floating Digital Dust Particles Canvas */}

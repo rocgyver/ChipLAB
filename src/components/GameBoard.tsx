@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { CellType, Chip, Direction, Position } from '../types/game';
+import { BoardThemeConfig, BOARD_THEMES } from '../types/theme';
 import { EinsteinSprite } from './EinsteinSprite';
 import { ChipCard } from './ChipCard';
 import { LabAtmosphere } from './LabAtmosphere';
@@ -15,6 +16,7 @@ interface GameBoardProps {
   isWalking: boolean;
   isVictory: boolean;
   isAmbientOn?: boolean;
+  theme?: BoardThemeConfig;
   chips: Chip[];
   onTileClick: (x: number, y: number) => void;
   onPush: (dir: Direction) => void;
@@ -30,6 +32,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   isWalking,
   isVictory,
   isAmbientOn = true,
+  theme = BOARD_THEMES['Cyber Green'],
   chips,
   onTileClick,
   onPush,
@@ -77,16 +80,25 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   }, [playerPos, playerDir, chips, grid]);
 
   return (
-    <div className="relative inline-block p-3 sm:p-5 rounded-2xl bg-slate-900 border-2 border-slate-700/80 shadow-2xl overflow-hidden max-w-full">
+    <div
+      className={`relative inline-block p-3 sm:p-5 rounded-2xl border-2 shadow-2xl overflow-hidden max-w-full transition-all duration-300 ${theme.containerClass}`}
+    >
       {/* Background Lab Grid Circuit Pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40 pointer-events-none" />
+      <div
+        className="absolute inset-0 [background-size:16px_16px] opacity-40 pointer-events-none transition-all duration-300"
+        style={{
+          backgroundImage: `radial-gradient(${theme.gridRadialDotColor} 1px, transparent 1px)`,
+        }}
+      />
 
       {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses (Toggleable) */}
-      {isAmbientOn && <LabAtmosphere />}
+      {isAmbientOn && <LabAtmosphere theme={theme} />}
 
       {/* Outer Lab Frame Decal */}
-      <div className="absolute top-1 left-2 text-[9px] font-mono text-emerald-500/60 uppercase tracking-widest pointer-events-none">
-        LAB MATRIX // SECTOR-VGA
+      <div
+        className={`absolute top-1 left-2 text-[9px] font-mono uppercase tracking-widest pointer-events-none transition-colors duration-300 ${theme.decalTextClass}`}
+      >
+        LAB MATRIX // {theme.badgeLabel.toUpperCase()}
       </div>
       <div className="absolute top-1 right-2 text-[9px] font-mono text-slate-500 pointer-events-none">
         DIM: {width}×{height}
@@ -115,12 +127,12 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               <div
                 key={`tile-${x}-${y}`}
                 onClick={() => onTileClick(x, y)}
-                className={`relative flex items-center justify-center cursor-pointer transition-colors ${
+                className={`relative flex items-center justify-center cursor-pointer transition-colors duration-200 ${
                   isWall
-                    ? 'bg-gradient-to-b from-slate-700 via-slate-800 to-slate-900 border border-slate-600/60 shadow-inner'
+                    ? theme.wallClass
                     : isObstacle
-                    ? 'bg-gradient-to-br from-indigo-950 to-slate-900 border border-indigo-700/60'
-                    : 'bg-slate-950/70 border border-slate-800/60 hover:bg-slate-800/40'
+                    ? theme.obstacleClass
+                    : theme.emptyTileClass
                 }`}
               >
                 {/* Wall Details */}
@@ -146,8 +158,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
                 {/* Empty Floor Decals (Coordinate markings) */}
                 {!isWall && !isObstacle && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-15">
-                    <div className="w-1 h-1 rounded-full bg-slate-400" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
+                    <div className={`w-1 h-1 rounded-full ${theme.rivetClass}`} />
                   </div>
                 )}
               </div>
@@ -164,7 +176,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 className={`absolute rounded-full -translate-x-1/2 -translate-y-1/2 ${
                   laserTrajectory.merged && idx === laserTrajectory.path.length - 2
                     ? 'w-4 h-4 bg-amber-400/80 animate-ping'
-                    : 'w-2 h-2 bg-emerald-400/70 shadow-[0_0_8px_#34d399]'
+                    : `w-2 h-2 ${theme.laserDotClass}`
                 }`}
                 style={{
                   left: `${((pt.x + 0.5) / width) * 100}%`,
