@@ -104,22 +104,9 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses (Toggleable) */}
       {isAmbientOn && <LabAtmosphere theme={theme} />}
 
-      {/* Wraparound continuous space edge portal markers */}
+      {/* Wraparound continuous space edge portal boundary frame */}
       {isWraparound && (
-        <div className="absolute inset-0 pointer-events-none rounded-none border border-dashed border-cyan-400/40 shadow-[inset_0_0_14px_rgba(34,211,238,0.12)] z-10">
-          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
-            <span>▲▼ 空間穿越</span>
-          </div>
-          <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
-            <span>▲▼ 空間穿越</span>
-          </div>
-          <div className="absolute left-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
-            <span>◀▶</span>
-          </div>
-          <div className="absolute right-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
-            <span>◀▶</span>
-          </div>
-        </div>
+        <div className="absolute inset-0 pointer-events-none rounded-none border border-dashed border-cyan-400/30 shadow-[inset_0_0_14px_rgba(34,211,238,0.10)] z-10" />
       )}
 
       {/* Outer Lab Frame Decal */}
