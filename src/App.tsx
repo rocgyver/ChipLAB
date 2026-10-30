@@ -959,7 +959,7 @@ export default function App() {
             onClick={() => setIsLevelSelectOpen(true)}
             className="hover:text-white transition-colors whitespace-nowrap shrink-0 flex items-center gap-1 cursor-pointer"
           >
-            <span>關卡全覽 (24關)</span>
+            <span>關卡全覽 ({LEVELS.length}關)</span>
           </button>
           <button
             type="button"
@@ -1174,7 +1174,7 @@ export default function App() {
           moves={moves}
           bestMoves={bestRecord}
           timeLeft={isTimedMode ? timeLeft : undefined}
-          hasNextLevel={currentLevel.id < 24}
+          hasNextLevel={LEVELS.findIndex((l) => l.id === currentLevel.id) < LEVELS.length - 1}
           onNextLevel={handleNextLevel}
           onReplay={handleReset}
           onLevelSelect={() => {

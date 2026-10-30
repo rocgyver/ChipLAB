@@ -142,10 +142,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         style={{
           gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${height}, minmax(0, 1fr))`,
-          width: `min(90vw, ${width * 56}px)`,
-          height: `min(${90 * (height / width)}vw, ${height * 56}px)`,
-          maxWidth: `${width * 60}px`,
-          maxHeight: `${height * 60}px`,
+          width: `min(92vw, min(60vh, ${width * 52}px))`,
+          height: `min(${92 * (height / width)}vw, min(${60 * (height / width)}vh, ${height * 52}px))`,
+          maxWidth: `${width * 56}px`,
+          maxHeight: `${height * 56}px`,
         }}
       >
         {/* Tiles Rendering */}

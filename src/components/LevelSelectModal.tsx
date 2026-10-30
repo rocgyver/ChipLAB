@@ -18,10 +18,11 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
 }) => {
   const [activeChapter, setActiveChapter] = useState<number>(() => {
     const cur = LEVELS.find((l) => l.id === currentLevelId);
-    return cur ? cur.chapter : 1;
+    return cur ? cur.chapter : 0;
   });
 
   const chapters = [
+    { id: 0, name: 'Level.0：晶片工廠', range: 'Fab.0', minStarsToUnlock: 0 },
     { id: 1, name: 'Level.1：基礎合成室', range: 'Lab.1-6', minStarsToUnlock: 0 },
     { id: 2, name: 'Level.2：電路迴廊', range: 'Lab.7-12', minStarsToUnlock: 6 },
     { id: 3, name: 'Level.3：多階處理器', range: 'Lab.13-18', minStarsToUnlock: 18 },
@@ -45,9 +46,9 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
             </h3>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-              <span>{totalStars} / 72 星</span>
+              <span>{totalStars} / {LEVELS.length * 3} 星</span>
               <span>·</span>
-              <span>{totalSolved} / 24 通關</span>
+              <span>{totalSolved} / {LEVELS.length} 通關</span>
             </div>
           </div>
           <button
@@ -62,7 +63,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
         {/* Chapter Tabs */}
         <div className="flex items-center gap-1 px-4 py-2 bg-slate-950/40 border-b border-slate-800/80 overflow-x-auto no-scrollbar">
           {chapters.map((ch) => {
-            const isUnlocked = totalStars >= ch.minStarsToUnlock || ch.id === 1;
+            const isUnlocked = totalStars >= ch.minStarsToUnlock || ch.id <= 1;
             const isActive = activeChapter === ch.id;
 
             return (
@@ -111,7 +112,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                 <div className="flex items-center justify-between w-full mb-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-mono font-bold text-emerald-400">
-                      Lab.{lvl.id}
+                      {lvl.id === 0 ? 'Fab.0' : `Lab.${lvl.id}`}
                     </span>
                     {isSolved && (
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />

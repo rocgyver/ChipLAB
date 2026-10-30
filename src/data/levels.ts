@@ -38,6 +38,50 @@ export interface VerifiedLevelData extends LevelData {
 
 export const LEVELS: VerifiedLevelData[] = [
   {
+    "id": 0,
+    "chapter": 0,
+    "chapterName": "Level.0：晶片工廠",
+    "title": "Fab.0 - 晶片創世紀",
+    "subtitle": "15×15 晶圓廠巨型無塵室 · 散落晶圓鏈鎖反應合成超級電腦",
+    "width": 15,
+    "height": 15,
+    "playerStart": {
+      "x": 7,
+      "y": 7
+    },
+    "targetLevel": 8,
+    "parMoves": 36,
+    "wraparound": false,
+    "grid": createEmptyRoom(15, 15, [
+      [3, 4],
+      [11, 4],
+      [2, 8],
+      [12, 8],
+      [4, 10],
+      [10, 10]
+    ]),
+    "chips": [
+      { "x": 3, "y": 2, "level": 1 },
+      { "x": 6, "y": 2, "level": 1 },
+      { "x": 8, "y": 2, "level": 1 },
+      { "x": 11, "y": 2, "level": 1 },
+      { "x": 3, "y": 12, "level": 1 },
+      { "x": 6, "y": 12, "level": 1 },
+      { "x": 8, "y": 12, "level": 1 },
+      { "x": 11, "y": 12, "level": 1 },
+      { "x": 2, "y": 5, "level": 2 },
+      { "x": 5, "y": 5, "level": 2 },
+      { "x": 9, "y": 5, "level": 2 },
+      { "x": 12, "y": 5, "level": 2 },
+      { "x": 3, "y": 8, "level": 3 },
+      { "x": 11, "y": 8, "level": 3 },
+      { "x": 7, "y": 4, "level": 4 },
+      { "x": 5, "y": 9, "level": 6 },
+      { "x": 9, "y": 9, "level": 7 }
+    ],
+    "hint": "在 15×15 無塵廠房中，先從邊界南北兩側將 Chip.1 橫向對撞合成 Chip.2，再循著直行導軌逐級推升連鎖反應，最後激發量子核心誕生 Titan 超級電腦！"
+  },
+  {
     "id": 1,
     "chapter": 1,
     "chapterName": "Level.1：基礎合成室",

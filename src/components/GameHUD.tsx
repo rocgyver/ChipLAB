@@ -75,7 +75,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           <div className="flex items-center gap-2 text-xs text-emerald-400 font-mono">
             <span>{currentLevel.chapterName}</span>
             <span>·</span>
-            <span>Lab.{currentLevel.id}</span>
+            <span>{currentLevel.id === 0 ? 'Fab.0' : `Lab.${currentLevel.id}`}</span>
             {(currentLevel.wraparound || currentLevel.id >= 7) && (
               <span className="px-1.5 py-0.2 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-600/60 text-[10px] flex items-center gap-1 font-bold">
                 <span>🔄 環狀邊界空間</span>

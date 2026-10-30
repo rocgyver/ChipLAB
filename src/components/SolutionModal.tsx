@@ -41,7 +41,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
-                <span>Lab.{level.id} · 官方 BFS 驗證解法</span>
+                <span>{level.id === 0 ? 'Fab.0' : `Lab.${level.id}`} · 官方 BFS 驗證解法</span>
               </h3>
               <p className="text-xs text-emerald-400/90 font-mono">
                 ✓ 經圖論廣度優先搜尋（BFS）100% 證明可行

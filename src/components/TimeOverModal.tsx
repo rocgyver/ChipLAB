@@ -36,7 +36,7 @@ export const TimeOverModal: React.FC<TimeOverModalProps> = ({
         <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300 font-mono mb-5 space-y-1">
           <div className="flex justify-between">
             <span className="text-slate-400">目前關卡:</span>
-            <span className="text-white font-bold">Lab.{level.id} · {level.title}</span>
+            <span className="text-white font-bold">{level.id === 0 ? 'Fab.0' : `Lab.${level.id}`} · {level.title}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">建議步數:</span>
