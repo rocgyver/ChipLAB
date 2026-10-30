@@ -238,7 +238,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
                   key={lvl}
                   type="button"
                   onClick={() => setActiveTool(lvl)}
-                  className={`px-2 py-1 rounded text-xs font-mono font-bold border transition-colors cursor-pointer ${
+                  className={`px-2 py-1 rounded-none text-xs font-mono font-bold border transition-colors cursor-pointer ${
                     isActive ? 'ring-2 ring-white scale-105 shadow-md' : 'opacity-80 hover:opacity-100'
                   }`}
                   style={{
@@ -272,7 +272,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
         {/* Editor Board View */}
         <div className="flex-1 overflow-auto p-4 flex items-center justify-center bg-slate-950">
           <div
-            className="grid select-none border-2 border-slate-700 rounded-xl bg-slate-900 p-2 shadow-2xl relative"
+            className="grid select-none border-2 border-slate-700 rounded-none bg-slate-900 p-2 shadow-2xl relative"
             style={{
               gridTemplateColumns: `repeat(${width}, 46px)`,
               gridTemplateRows: `repeat(${height}, 46px)`,

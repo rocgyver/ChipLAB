@@ -84,7 +84,7 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span
-                      className="text-xs font-mono font-bold px-2 py-0.5 rounded"
+                      className="text-xs font-mono font-bold px-2 py-0.5 rounded-none"
                       style={{
                         background: selectedDef.bgGradient,
                         color: selectedDef.borderColor,

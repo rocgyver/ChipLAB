@@ -114,7 +114,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
                       </span>
                       <span className="text-slate-400">推動</span>
                       <span
-                        className="px-1.5 py-0.5 rounded text-[10px] font-bold"
+                        className="px-1.5 py-0.5 rounded-none text-[10px] font-bold"
                         style={{
                           background: chipDef?.bgGradient || '#1e293b',
                           color: chipDef?.borderColor || '#cbd5e1',
@@ -125,7 +125,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
                     </div>
 
                     {st.merged && (
-                      <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded-none bg-emerald-950 text-emerald-400 border border-emerald-800 text-[10px] font-bold whitespace-nowrap">
                         ★ 碰撞合成
                       </span>
                     )}

@@ -87,7 +87,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
   return (
     <div
-      className={`relative inline-block p-3 sm:p-5 rounded-2xl border-2 shadow-2xl overflow-hidden max-w-full transition-all duration-300 ${
+      className={`relative inline-block p-3 sm:p-5 rounded-none border-2 shadow-2xl overflow-hidden max-w-full transition-all duration-300 ${
         isWraparound
           ? `${theme.containerClass} ring-1 ring-cyan-500/50 shadow-[0_12px_40px_rgba(6,182,212,0.25)]`
           : theme.containerClass
@@ -106,17 +106,17 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Wraparound continuous space edge portal markers */}
       {isWraparound && (
-        <div className="absolute inset-0 pointer-events-none rounded-2xl border border-dashed border-cyan-400/40 shadow-[inset_0_0_14px_rgba(34,211,238,0.12)] z-10">
-          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
+        <div className="absolute inset-0 pointer-events-none rounded-none border border-dashed border-cyan-400/40 shadow-[inset_0_0_14px_rgba(34,211,238,0.12)] z-10">
+          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
             <span>▲▼ 空間穿越</span>
           </div>
-          <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
+          <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
             <span>▲▼ 空間穿越</span>
           </div>
-          <div className="absolute left-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
+          <div className="absolute left-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
             <span>◀▶</span>
           </div>
-          <div className="absolute right-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
+          <div className="absolute right-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-none bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
             <span>◀▶</span>
           </div>
         </div>
@@ -138,7 +138,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Grid Container */}
       <div
-        className="relative grid select-none touch-manipulation mx-auto overflow-hidden rounded-xl"
+        className="relative grid select-none touch-manipulation mx-auto overflow-hidden rounded-none"
         style={{
           gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${height}, minmax(0, 1fr))`,
@@ -183,8 +183,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
                     </div>
-                    <div className="w-full h-1 bg-slate-700 rounded-sm" />
-                    <div className="w-full h-1 bg-slate-700 rounded-sm" />
+                    <div className="w-full h-1 bg-slate-700 rounded-none" />
+                    <div className="w-full h-1 bg-slate-700 rounded-none" />
                   </div>
                 )}
 
@@ -223,6 +223,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         {chips.map((chip) => {
           const pushableDirs = pushableChipsMap.get(chip.id) || [];
           const clones: { x: number; y: number }[] = [];
+          const isDenseBoard = width >= 10 || height >= 10;
 
           if (isWraparound && chip.noTransition) {
             if (chip.x < 1.0) clones.push({ x: chip.x + width, y: chip.y });
@@ -251,6 +252,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                 isMerging={chip.isMerging}
                 pushableDirections={isClone ? [] : pushableDirs}
                 onDirectPush={isClone ? undefined : (d) => onPush(d)}
+                numberOnly={isDenseBoard}
               />
             </div>
           );

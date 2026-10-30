@@ -42,6 +42,7 @@ export interface LevelData {
   hint?: string;
   solutionSteps?: SolutionStep[];
   wraparound?: boolean;
+  customBoundary?: boolean;
 }
 
 export interface GameSnapshot {

@@ -9,6 +9,7 @@ interface ChipCardProps {
   onDirectPush?: (dir: Direction) => void;
   size?: 'normal' | 'large' | 'compact';
   showDetails?: boolean;
+  numberOnly?: boolean;
 }
 
 export const ChipCard: React.FC<ChipCardProps> = ({
@@ -18,6 +19,7 @@ export const ChipCard: React.FC<ChipCardProps> = ({
   onDirectPush,
   size = 'normal',
   showDetails = true,
+  numberOnly = false,
 }) => {
   const def = CHIP_DEFINITIONS[level] || CHIP_DEFINITIONS[1];
 
@@ -26,13 +28,13 @@ export const ChipCard: React.FC<ChipCardProps> = ({
 
   return (
     <div
-      className={`relative w-full h-full select-none flex items-center justify-center p-0.5 ${
+      className={`@container relative w-full h-full select-none flex items-center justify-center p-0.5 ${
         isMerging ? 'scale-110 transition-transform duration-150' : ''
       }`}
     >
-      {/* Outer Chip Casing */}
+      {/* Outer Chip Casing: Straight rectangular IC package (no rounded corners) */}
       <div
-        className={`relative w-full h-full rounded-md shadow-lg border flex flex-col items-center justify-between overflow-hidden transition-all duration-150 ${
+        className={`relative w-full h-full rounded-none shadow-lg border flex flex-col items-center justify-between overflow-hidden transition-all duration-150 ${
           isSupercomputer
             ? 'animate-pulse ring-2 ring-yellow-400 ring-offset-1 ring-offset-black'
             : isQuantum
@@ -45,66 +47,100 @@ export const ChipCard: React.FC<ChipCardProps> = ({
           boxShadow: `0 4px 12px ${def.glowColor}, inset 0 1px 1px rgba(255,255,255,0.2)`,
         }}
       >
-        {/* Dual-in-line Pins on Left & Right */}
-        <div className="absolute left-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
-          {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
-            <div
-              key={`pin-l-${i}`}
-              className="w-1 h-1.5 -ml-0.5 rounded-sm bg-gradient-to-r from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
-            />
-          ))}
-        </div>
-        <div className="absolute right-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
-          {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
-            <div
-              key={`pin-r-${i}`}
-              className="w-1 h-1.5 -mr-0.5 rounded-sm bg-gradient-to-l from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
-            />
-          ))}
-        </div>
-
-        {/* Top Header of Chip: Pin-1 Index Notch & Level */}
-        <div className="w-full flex items-center justify-between px-1.5 pt-0.5 z-10">
-          {/* Half-circle notch at top */}
-          <div className="w-2 h-1 bg-slate-900 border-b border-slate-700 rounded-b-full mx-auto -mt-0.5 opacity-80" />
-        </div>
-
-        {/* Chip Body Core */}
-        <div className="flex-1 flex flex-col items-center justify-center text-center px-0.5 z-10 w-full min-h-0 overflow-hidden">
-          {/* Level Badge */}
-          <div
-            className="text-[7.5px] sm:text-[8.5px] font-bold tracking-tight px-1 py-0.2 rounded font-mono uppercase leading-none mb-0.5"
-            style={{
-              color: def.borderColor,
-              textShadow: `0 0 5px ${def.glowColor}`,
-            }}
-          >
-            {isSupercomputer ? '★ SUPER ★' : `Chip.${level}`}
+        {/* If numberOnly or compact space: Render ONLY the number */}
+        {numberOnly ? (
+          <div className="flex-1 flex items-center justify-center text-center w-full h-full z-10 leading-none">
+            <span
+              className="font-black font-mono leading-none tracking-tighter select-none"
+              style={{
+                color: def.borderColor,
+                textShadow: `0 0 6px ${def.glowColor}`,
+                fontSize: 'clamp(11px, 52cqw, 22px)',
+              }}
+            >
+              {isSupercomputer ? '8★' : level}
+            </span>
           </div>
-
-          {/* Chip Code Silkscreen */}
-          <div className="text-[8.5px] sm:text-[9.5px] font-black tracking-tight text-white font-mono leading-none truncate max-w-full">
-            {def.code}
-          </div>
-
-          {/* Micro Subtitle / Short Name */}
-          {showDetails && size !== 'compact' && (
-            <div className="text-[6.5px] sm:text-[7.5px] text-white/80 font-sans tracking-tighter truncate max-w-full mt-0.5 leading-none">
-              {def.shortName || def.name.split(' ')[0]}
+        ) : (
+          <>
+            {/* Auto-responsive: On very small containers (<46px), show number-only */}
+            <div className="flex @[46px]:hidden flex-1 items-center justify-center text-center w-full h-full z-10 leading-none">
+              <span
+                className="font-black font-mono leading-none tracking-tighter select-none"
+                style={{
+                  color: def.borderColor,
+                  textShadow: `0 0 6px ${def.glowColor}`,
+                  fontSize: 'clamp(10px, 52cqw, 20px)',
+                }}
+              >
+                {isSupercomputer ? '8★' : level}
+              </span>
             </div>
-          )}
-        </div>
 
-        {/* Bottom Silkscreen bar */}
-        <div className="w-full px-1 pb-0.5 flex items-center justify-between text-[6px] sm:text-[6.5px] text-white/40 font-mono leading-none">
-          <span>{def.pins}P</span>
-          <span>{def.year}</span>
-        </div>
+            {/* Detailed IC Silkscreen view: only visible when space permits (>=46px) */}
+            <div className="hidden @[46px]:flex flex-col w-full h-full justify-between items-center relative">
+              {/* Dual-in-line Pins on Left & Right */}
+              <div className="absolute left-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
+                {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
+                  <div
+                    key={`pin-l-${i}`}
+                    className="w-1 h-1.5 -ml-0.5 rounded-none bg-gradient-to-r from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
+                  />
+                ))}
+              </div>
+              <div className="absolute right-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
+                {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
+                  <div
+                    key={`pin-r-${i}`}
+                    className="w-1 h-1.5 -mr-0.5 rounded-none bg-gradient-to-l from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
+                  />
+                ))}
+              </div>
+
+              {/* Top Header of Chip: Pin-1 Index Notch */}
+              <div className="w-full flex items-center justify-between px-1.5 pt-0.5 z-10">
+                <div className="w-2 h-1 bg-slate-900 border-b border-l border-r border-slate-700 mx-auto -mt-0.5 opacity-80" />
+              </div>
+
+              {/* Chip Body Core */}
+              <div className="flex-1 flex flex-col items-center justify-center text-center px-0.5 z-10 w-full min-h-0 overflow-hidden">
+                {/* Level Badge */}
+                <div
+                  className="text-[7.5px] sm:text-[8.5px] font-bold tracking-tight px-1 py-0.2 rounded-none font-mono uppercase leading-none mb-0.5"
+                  style={{
+                    color: def.borderColor,
+                    textShadow: `0 0 5px ${def.glowColor}`,
+                  }}
+                >
+                  {isSupercomputer ? '★ SUPER ★' : `Chip.${level}`}
+                </div>
+
+                {/* Chip Code Silkscreen */}
+                <div className="text-[8.5px] sm:text-[9.5px] font-black tracking-tight text-white font-mono leading-none truncate max-w-full">
+                  {def.code}
+                </div>
+
+                {/* Micro Subtitle / Short Name */}
+                {showDetails && size !== 'compact' && (
+                  <div className="text-[6.5px] sm:text-[7.5px] text-white/80 font-sans tracking-tighter truncate max-w-full mt-0.5 leading-none">
+                    {def.shortName || def.name.split(' ')[0]}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Silkscreen bar */}
+              <div className="w-full px-1 pb-0.5 flex items-center justify-between text-[6px] sm:text-[6.5px] text-white/40 font-mono leading-none">
+                <span>{def.pins}P</span>
+                <span>{def.year}</span>
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Merge Shockwave Glow */}
         {isMerging && (
           <div
-            className="absolute inset-0 bg-white/40 animate-ping rounded-md pointer-events-none"
+            className="absolute inset-0 bg-white/40 animate-ping rounded-none pointer-events-none"
             style={{ animationDuration: '0.4s' }}
           />
         )}
@@ -137,7 +173,7 @@ export const ChipCard: React.FC<ChipCardProps> = ({
               onDirectPush?.(dir);
             }}
             title={`向${dir === 'UP' ? '上' : dir === 'DOWN' ? '下' : dir === 'LEFT' ? '左' : '右'}推動`}
-            className={`absolute ${posClass} z-30 w-5 h-5 rounded-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[9px] flex items-center justify-center shadow-md animate-pulse cursor-pointer border border-amber-200 transition-transform hover:scale-125`}
+            className={`absolute ${posClass} z-30 w-4 h-4 rounded-none bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[9px] flex items-center justify-center shadow-md animate-pulse cursor-pointer border border-amber-200 transition-transform hover:scale-125`}
           >
             {arrowIcon}
           </button>

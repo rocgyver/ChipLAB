@@ -42,11 +42,16 @@ export function getEffectiveGrid(level: LevelData): CellType[][] {
   const isWrap = isLevelWraparound(level);
   if (!isWrap) return level.grid;
 
+  // Levels with designed partial boundary walls (e.g. Fab.0) preserve their grid layout
+  if (level.id === 0 || level.customBoundary) {
+    return level.grid;
+  }
+
   const h = level.grid.length;
   const w = level.grid[0].length;
   return level.grid.map((row, y) =>
     row.map((cell, x) => {
-      // Remove outer perimeter boundary walls in wraparound levels
+      // Remove outer perimeter boundary walls in legacy wraparound levels
       if (x === 0 || x === w - 1 || y === 0 || y === h - 1) {
         return 'EMPTY';
       }

@@ -121,7 +121,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
 
                   {/* Target Mini Chip Tag */}
                   <span
-                    className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded"
+                    className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-none"
                     style={{
                       background: targetDef.bgGradient,
                       color: targetDef.borderColor,
