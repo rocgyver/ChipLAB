@@ -62,7 +62,7 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
                   </div>
                   <div className="min-w-0">
                     <div className="text-[11px] font-mono font-bold" style={{ color: def.borderColor }}>
-                      {lvl === 8 ? '★ 終極目標' : `LV.${lvl}`}
+                      {lvl === 8 ? '★ 終極目標' : `Chip.${lvl}`}
                     </div>
                     <div className="text-xs font-bold text-white truncate max-w-[120px]">
                       {def.code}
@@ -91,7 +91,7 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
                         border: `1px solid ${selectedDef.borderColor}`,
                       }}
                     >
-                      {selectedLevel === 8 ? '★ SUPERCOMPUTER' : `等級 ${selectedLevel}`}
+                      {selectedLevel === 8 ? '★ SUPERCOMPUTER' : `Chip.${selectedLevel}`}
                     </span>
                     <span className="text-xs text-slate-500 font-mono">
                       發表年代: {selectedDef.year}
@@ -137,28 +137,28 @@ export const EncyclopediaModal: React.FC<EncyclopediaModalProps> = ({ onClose })
               </span>
               {selectedLevel === 1 ? (
                 <div className="flex items-center gap-2 text-xs font-mono text-slate-300 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                  <span>2× [LV.1 7400 閘]</span>
+                  <span>2× [Chip.1 7400 閘]</span>
                   <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400 font-bold">1× [LV.2 64K SRAM]</span>
+                  <span className="text-emerald-400 font-bold">1× [Chip.2 64K SRAM]</span>
                 </div>
               ) : selectedLevel < 8 ? (
                 <div className="flex flex-col gap-1.5 text-xs font-mono">
                   <div className="flex items-center gap-2 text-slate-300 bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
-                    <span>2× [LV.{selectedLevel - 1} {CHIP_DEFINITIONS[selectedLevel - 1].code}]</span>
+                    <span>2× [Chip.{selectedLevel - 1} {CHIP_DEFINITIONS[selectedLevel - 1].code}]</span>
                     <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
-                    <span className="text-amber-400 font-bold">1× [LV.{selectedLevel} {selectedDef.code}]</span>
+                    <span className="text-amber-400 font-bold">1× [Chip.{selectedLevel} {selectedDef.code}]</span>
                   </div>
                   <div className="flex items-center gap-2 text-slate-400 px-1 text-[11px]">
                     <span>再收集 2× 本晶片</span>
                     <ArrowRight className="w-3 h-3 text-slate-500" />
-                    <span>可升級為 LV.{selectedLevel + 1} {CHIP_DEFINITIONS[selectedLevel + 1]?.name}</span>
+                    <span>可升級為 Chip.{selectedLevel + 1} {CHIP_DEFINITIONS[selectedLevel + 1]?.name}</span>
                   </div>
                 </div>
               ) : (
                 <div className="bg-amber-950/30 border border-amber-500/40 p-3 rounded-lg text-amber-300 text-xs font-mono flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>
-                    2× [LV.7 量子運算單元] 撞擊融合 ➔ 誕生本超級電腦！至尊完成狀態！
+                    2× [Chip.7 量子運算單元] 撞擊融合 ➔ 誕生本超級電腦！至尊完成狀態！
                   </span>
                 </div>
               )}

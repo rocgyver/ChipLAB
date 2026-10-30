@@ -40,7 +40,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 1,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "首次通電 (First Contact)",
     "subtitle": "將兩個 7400 閘晶片撞擊合併為 1 個 SRAM",
     "width": 7,
@@ -126,7 +126,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 2,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "垂直匯流排 (Vertical Bus)",
     "subtitle": "利用上下推動完成垂直軸的碰撞升級",
     "width": 6,
@@ -223,7 +223,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 3,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "三角校準 (Triangle Fusion)",
     "subtitle": "四顆基礎晶片，兩兩合成為二級，最終合成為三級微處理器",
     "width": 8,
@@ -352,7 +352,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 4,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "阻擋牆運用 (Wall Bounce)",
     "subtitle": "利用立柱阻擋晶片滑行並在十字路口相撞",
     "width": 8,
@@ -472,7 +472,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 5,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "轉角對齊 (Corner Alignment)",
     "subtitle": "利用角落與邊緣將晶片聚集在同一條軌道上",
     "width": 7,
@@ -585,7 +585,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 6,
     "chapter": 1,
-    "chapterName": "第一章：基礎合成室",
+    "chapterName": "Level.1：基礎合成室",
     "title": "SRAM 全面封裝 (SRAM Assembly)",
     "subtitle": "掌握在開放區域中的連續推移與位移",
     "width": 8,
@@ -690,7 +690,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 1
       }
     ],
-    "hint": "先推 (2, 2) 向右撞擊 (5, 2) 合成 Level 2，再推 (3, 5) 向右撞擊 (6, 5) 合成 Level 2，最後垂直對撞！",
+    "hint": "先推 (2, 2) 向右撞擊 (5, 2) 合成 Chip.2，再推 (3, 5) 向右撞擊 (6, 5) 合成 Chip.2，最後垂直對撞！",
     "solutionSteps": [
       {
         "standX": 1,
@@ -733,7 +733,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 7,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "環狀長廊 (The Torus Corridor)",
     "subtitle": "空間邊界已解鎖！向左滑出邊界，將從右側邊緣高速折返！",
     "width": 9,
@@ -852,7 +852,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 8,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "隔間穿梭 (Chamber Warp)",
     "subtitle": "穿越中央隔間，或利用左右邊界環狀折返進行空間包抄！",
     "width": 9,
@@ -959,7 +959,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 2
       }
     ],
-    "hint": "在左室將兩顆 Level 1 縱向相撞合為 Level 2，接著向左滑出邊界（或向右穿過隔間門）與右室晶片完美結合！",
+    "hint": "在左室將兩顆 Chip.1 縱向相撞合為 Chip.2，接著向左滑出邊界（或向右穿過隔間門）與右室晶片完美結合！",
     "solutionSteps": [
       {
         "standX": 2,
@@ -1002,9 +1002,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 9,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "數學協同處理器 (Math Co-Processor)",
-    "subtitle": "四顆晶片兩兩撞擊，誕生傳奇 80387 運算器 (Level 4)",
+    "subtitle": "四顆晶片兩兩撞擊，誕生傳奇 80387 運算器 (Chip.4)",
     "width": 9,
     "height": 7,
     "playerStart": {
@@ -1114,7 +1114,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 2
       }
     ],
-    "hint": "先推 (5, 5) 向上撞擊 (5, 2) 合成 Level 3，再推 (3, 5) 向上撞擊 (3, 2) 合成 Level 3，最後水平對撞！",
+    "hint": "先推 (5, 5) 向上撞擊 (5, 2) 合成 Chip.3，再推 (3, 5) 向上撞擊 (3, 2) 合成 Chip.3，最後水平對撞！",
     "solutionSteps": [
       {
         "standX": 5,
@@ -1148,7 +1148,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 10,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "迴轉避險 (Turnabout Maneuver)",
     "subtitle": "利用中央立柱避免晶片貼在邊緣死角",
     "width": 8,
@@ -1273,7 +1273,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 11,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "S 型導軌 (S-Curve Guide)",
     "subtitle": "在錯落的隔板間靈巧穿梭",
     "width": 9,
@@ -1409,7 +1409,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 12,
     "chapter": 2,
-    "chapterName": "第二章：電路迴廊",
+    "chapterName": "Level.2：電路迴廊",
     "title": "十字交會 (Cross Intersection)",
     "subtitle": "兩顆 8086 微處理器在垂直中軸線上撞擊升級",
     "width": 9,
@@ -1549,7 +1549,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 13,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "跨代合成 (Cross-Gen Fusion)",
     "subtitle": "梯級骨牌連鎖：兩顆 2 級合成 3 級，再與現存 3 級合成 4 級！",
     "width": 9,
@@ -1656,7 +1656,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 3
       }
     ],
-    "hint": "走到 (1, 2) 向右推 (2, 2)，撞擊 (6, 2) 合成 Level 3；再走到 (6, 1) 向下推，撞擊 (6, 4) 誕生 4 級！",
+    "hint": "走到 (1, 2) 向右推 (2, 2)，撞擊 (6, 2) 合成 Chip.3；再走到 (6, 1) 向下推，撞擊 (6, 4) 誕生 4 級！",
     "solutionSteps": [
       {
         "standX": 1,
@@ -1681,7 +1681,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 14,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "對稱機房 (Symmetric Hub)",
     "subtitle": "對稱佈局中的多步對撞",
     "width": 9,
@@ -1804,7 +1804,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 2
       }
     ],
-    "hint": "左側縱向對撞合為 Level 3，右側縱向對撞合為 Level 3，最後水平對撞！",
+    "hint": "左側縱向對撞合為 Chip.3，右側縱向對撞合為 Chip.3，最後水平對撞！",
     "solutionSteps": [
       {
         "standX": 6,
@@ -1838,9 +1838,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 15,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "486 世代降臨 (486 DX2 Revolution)",
-    "subtitle": "邁入 32 位元時代！合成出橘色 486 DX2 (Level 5)",
+    "subtitle": "邁入 32 位元時代！合成出橘色 486 DX2 (Chip.5)",
     "width": 9,
     "height": 8,
     "playerStart": {
@@ -2013,7 +2013,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 16,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "窄口效應 (Chokepoint)",
     "subtitle": "穿過單格走廊，進行隔室升級",
     "width": 10,
@@ -2138,7 +2138,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 17,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "階層金字塔 (The Hierarchy Pyramid)",
     "subtitle": "連續升階矩陣：兩顆 3 級合併為 4 級，再與現有 4 級合併為 5 級",
     "width": 9,
@@ -2279,7 +2279,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 18,
     "chapter": 3,
-    "chapterName": "第三章：多階處理器",
+    "chapterName": "Level.3：多階處理器",
     "title": "環狀超頻 (Clock Loop)",
     "subtitle": "繞行中央控制台，將兩顆 4 級晶片送入對撞軌道",
     "width": 9,
@@ -2437,9 +2437,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 19,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "奔騰年代 (Pentium Dawn)",
-    "subtitle": "四核協同處理器兩兩對撞，誕生紅色 Pentium MMX (Level 6)",
+    "subtitle": "四核協同處理器兩兩對撞，誕生紅色 Pentium MMX (Chip.6)",
     "width": 10,
     "height": 8,
     "playerStart": {
@@ -2606,9 +2606,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 20,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "光子晶片 (Photonic Core)",
-    "subtitle": "兩組高階晶片逐步推展，在精密立柱間合成出 Pentium (Level 6)",
+    "subtitle": "兩組高階晶片逐步推展，在精密立柱間合成出 Pentium (Chip.6)",
     "width": 9,
     "height": 8,
     "playerStart": {
@@ -2749,9 +2749,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 21,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "量子神經元 (Quantum Entanglement)",
-    "subtitle": "兩顆 Pentium MMX 相互糾纏，突破物理限制誕生量子 QPU (Level 7)",
+    "subtitle": "兩顆 Pentium MMX 相互糾纏，突破物理限制誕生量子 QPU (Chip.7)",
     "width": 10,
     "height": 8,
     "playerStart": {
@@ -2914,9 +2914,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 22,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "大腦風暴 (Brainstorm Nexus)",
-    "subtitle": "在狹窄矩陣中調度，推升出量子晶片 QPU (Level 7)",
+    "subtitle": "在狹窄矩陣中調度，推升出量子晶片 QPU (Chip.7)",
     "width": 9,
     "height": 8,
     "playerStart": {
@@ -3043,7 +3043,7 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 23,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "超級電腦前夕 (Eve of Supercomputing)",
     "subtitle": "階梯連鎖：由 5 級、6 級一路推動合成至 7 級量子核心",
     "width": 10,
@@ -3194,9 +3194,9 @@ export const LEVELS: VerifiedLevelData[] = [
   {
     "id": 24,
     "chapter": 4,
-    "chapterName": "第四章：超級電腦誕生",
+    "chapterName": "Level.4：超級電腦誕生",
     "title": "終極超級電腦！(The Grand Supercomputer)",
-    "subtitle": "全劇終極殿堂：推動兩座量子核心，合成無上榮耀的超級電腦 (Level 8)！",
+    "subtitle": "全劇終極殿堂：推動兩座量子核心，合成無上榮耀的超級電腦 (Chip.8)！",
     "width": 11,
     "height": 9,
     "playerStart": {

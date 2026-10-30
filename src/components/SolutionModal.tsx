@@ -41,7 +41,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
             <div>
               <h3 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-1.5">
-                <span>第 {level.id} 關 · 官方 BFS 驗證解法</span>
+                <span>Lab.{level.id} · 官方 BFS 驗證解法</span>
               </h3>
               <p className="text-xs text-emerald-400/90 font-mono">
                 ✓ 經圖論廣度優先搜尋（BFS）100% 證明可行
@@ -64,7 +64,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
             <div>
               <span className="text-slate-400 block mb-0.5">關卡目標</span>
               <span className="text-white font-bold text-sm">
-                合成單一 {targetChip?.name || `LV.${level.targetLevel}`}
+                合成單一 {targetChip?.name || `Chip.${level.targetLevel}`}
               </span>
             </div>
             <div className="text-right">
@@ -120,7 +120,7 @@ export const SolutionModal: React.FC<SolutionModalProps> = ({
                           color: chipDef?.borderColor || '#cbd5e1',
                         }}
                       >
-                        LV.{st.chipLevel}
+                        Chip.{st.chipLevel}
                       </span>
                     </div>
 

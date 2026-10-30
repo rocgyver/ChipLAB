@@ -79,7 +79,7 @@ export const ChipCard: React.FC<ChipCardProps> = ({
               textShadow: `0 0 5px ${def.glowColor}`,
             }}
           >
-            {isSupercomputer ? '★ SUPER ★' : `LV.${level}`}
+            {isSupercomputer ? '★ SUPER ★' : `Chip.${level}`}
           </div>
 
           {/* Chip Code Silkscreen */}

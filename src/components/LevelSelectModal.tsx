@@ -22,10 +22,10 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
   });
 
   const chapters = [
-    { id: 1, name: '第一章：基礎合成室', range: '1-6 關', minStarsToUnlock: 0 },
-    { id: 2, name: '第二章：電路迴廊', range: '7-12 關', minStarsToUnlock: 6 },
-    { id: 3, name: '第三章：多階處理器', range: '13-18 關', minStarsToUnlock: 18 },
-    { id: 4, name: '第四章：超級電腦誕生', range: '19-24 關', minStarsToUnlock: 32 },
+    { id: 1, name: 'Level.1：基礎合成室', range: 'Lab.1-6', minStarsToUnlock: 0 },
+    { id: 2, name: 'Level.2：電路迴廊', range: 'Lab.7-12', minStarsToUnlock: 6 },
+    { id: 3, name: 'Level.3：多階處理器', range: 'Lab.13-18', minStarsToUnlock: 18 },
+    { id: 4, name: 'Level.4：超級電腦誕生', range: 'Lab.19-24', minStarsToUnlock: 32 },
   ];
 
   // Calculate total stars collected
@@ -41,7 +41,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/60">
           <div className="flex items-center gap-3">
             <h3 className="text-lg font-bold text-white tracking-tight">
-              實驗室關卡選單
+              實驗大樓關卡選單
             </h3>
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
               <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -111,7 +111,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                 <div className="flex items-center justify-between w-full mb-1">
                   <div className="flex items-center gap-1.5">
                     <span className="text-xs font-mono font-bold text-emerald-400">
-                      LEVEL {lvl.id}
+                      Lab.{lvl.id}
                     </span>
                     {isSolved && (
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -127,7 +127,7 @@ export const LevelSelectModal: React.FC<LevelSelectModalProps> = ({
                       border: `1px solid ${targetDef.borderColor}`,
                     }}
                   >
-                    LV.{lvl.targetLevel} {lvl.targetLevel === 8 ? '★' : ''}
+                    Chip.{lvl.targetLevel} {lvl.targetLevel === 8 ? '★' : ''}
                   </span>
                 </div>
 

@@ -75,7 +75,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           <div className="flex items-center gap-2 text-xs text-emerald-400 font-mono">
             <span>{currentLevel.chapterName}</span>
             <span>·</span>
-            <span>第 {currentLevel.id} 關</span>
+            <span>Lab.{currentLevel.id}</span>
             {(currentLevel.wraparound || currentLevel.id >= 7) && (
               <span className="px-1.5 py-0.2 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-600/60 text-[10px] flex items-center gap-1 font-bold">
                 <span>🔄 環狀邊界空間</span>
@@ -248,7 +248,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           <button
             type="button"
             onClick={onOpenEditor}
-            title="自製實驗室關卡"
+            title="自製實驗大樓關卡"
             className="px-2 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 active:scale-95 transition-colors flex items-center"
           >
             <Edit3 className="w-3.5 h-3.5" />

@@ -21,7 +21,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
   const [height, setHeight] = useState(7);
   const [activeTool, setActiveTool] = useState<ToolMode>('WALL');
   const [playerStart, setPlayerStart] = useState<Position>({ x: 1, y: 1 });
-  const [title, setTitle] = useState('自製實驗室關卡');
+  const [title, setTitle] = useState('自製實驗大樓關卡');
   const [copied, setCopied] = useState(false);
   const [jsonInput, setJsonInput] = useState('');
   const [showJsonBox, setShowJsonBox] = useState(false);
@@ -109,8 +109,8 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
       id: 999,
       chapter: 99,
       chapterName: '自訂實驗室',
-      title: title || '自製實驗室關卡',
-      subtitle: `自製挑戰 · 目標等級 LV.${balance.targetLevel}`,
+      title: title || '自製實驗大樓關卡',
+      subtitle: `自製挑戰 · 目標等級 Chip.${balance.targetLevel}`,
       width,
       height,
       playerStart,
@@ -166,7 +166,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-slate-950/70">
           <div className="flex items-center gap-2.5">
             <h3 className="text-lg font-bold text-white tracking-tight">
-              實驗室關卡編輯器
+              實驗大樓關卡編輯器
             </h3>
             <span className="text-xs text-slate-400 hidden sm:inline">
               設計專屬 IC 晶片推牌謎題
@@ -247,7 +247,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
                     borderColor: def.borderColor,
                   }}
                 >
-                  LV.{lvl}
+                  Chip.{lvl}
                 </button>
               );
             })}
@@ -258,7 +258,7 @@ export const LevelEditorModal: React.FC<LevelEditorModalProps> = ({
             {balance.isPowerOfTwo ? (
               <div className="flex items-center gap-1.5 text-emerald-400">
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>能量完美平衡 · 可合成為 LV.{balance.targetLevel}</span>
+                <span>能量完美平衡 · 可合成為 Chip.{balance.targetLevel}</span>
               </div>
             ) : (
               <div className="flex items-center gap-1.5 text-amber-400">
