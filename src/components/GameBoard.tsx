@@ -15,7 +15,10 @@ interface GameBoardProps {
   isPushing: boolean;
   isWalking: boolean;
   isVictory: boolean;
+  isKnockedOut?: boolean;
   isAmbientOn?: boolean;
+  isWraparound?: boolean;
+  isPlayerNoTransition?: boolean;
   theme?: BoardThemeConfig;
   chips: Chip[];
   onTileClick: (x: number, y: number) => void;
@@ -31,7 +34,10 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   isPushing,
   isWalking,
   isVictory,
+  isKnockedOut = false,
   isAmbientOn = true,
+  isWraparound = false,
+  isPlayerNoTransition = false,
   theme = BOARD_THEMES['Cyber Green'],
   chips,
   onTileClick,
@@ -44,13 +50,13 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
     dirs.forEach((d) => {
       const { dx, dy } = getDirectionDelta(d);
-      const adjX = playerPos.x + dx;
-      const adjY = playerPos.y + dy;
+      const adjX = isWraparound ? ((playerPos.x + dx) % width + width) % width : playerPos.x + dx;
+      const adjY = isWraparound ? ((playerPos.y + dy) % height + height) % height : playerPos.y + dy;
 
       const chip = chips.find((c) => c.x === adjX && c.y === adjY);
       if (chip) {
         // Can Einstein push it in direction `d`?
-        const result = calculatePush(grid, chips, chip, d);
+        const result = calculatePush(grid, chips, chip, d, isWraparound);
         if (result.canPush) {
           const list = map.get(chip.id) || [];
           list.push(d);
@@ -60,28 +66,32 @@ export const GameBoard: React.FC<GameBoardProps> = ({
     });
 
     return map;
-  }, [chips, playerPos, grid]);
+  }, [chips, playerPos, grid, isWraparound, width, height]);
 
   // Compute laser trajectory preview for the chip immediately in front of Einstein
   const laserTrajectory = useMemo(() => {
     const { dx, dy } = getDirectionDelta(playerDir);
-    const frontX = playerPos.x + dx;
-    const frontY = playerPos.y + dy;
+    const frontX = isWraparound ? ((playerPos.x + dx) % width + width) % width : playerPos.x + dx;
+    const frontY = isWraparound ? ((playerPos.y + dy) % height + height) % height : playerPos.y + dy;
     const frontChip = chips.find((c) => c.x === frontX && c.y === frontY);
 
     if (!frontChip) return null;
-    const result = calculatePush(grid, chips, frontChip, playerDir);
+    const result = calculatePush(grid, chips, frontChip, playerDir, isWraparound);
     if (!result.canPush || !result.traveledPath || result.traveledPath.length < 2) return null;
 
     return {
       path: result.traveledPath,
       merged: result.merged,
     };
-  }, [playerPos, playerDir, chips, grid]);
+  }, [playerPos, playerDir, chips, grid, isWraparound, width, height]);
 
   return (
     <div
-      className={`relative inline-block p-3 sm:p-5 rounded-2xl border-2 shadow-2xl overflow-hidden max-w-full transition-all duration-300 ${theme.containerClass}`}
+      className={`relative inline-block p-3 sm:p-5 rounded-2xl border-2 shadow-2xl overflow-hidden max-w-full transition-all duration-300 ${
+        isWraparound
+          ? `${theme.containerClass} ring-1 ring-cyan-500/50 shadow-[0_12px_40px_rgba(6,182,212,0.25)]`
+          : theme.containerClass
+      }`}
     >
       {/* Background Lab Grid Circuit Pattern */}
       <div
@@ -94,11 +104,33 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       {/* Dynamic Background Atmosphere: Digital Dust & Flickering Circuit Pulses (Toggleable) */}
       {isAmbientOn && <LabAtmosphere theme={theme} />}
 
+      {/* Wraparound continuous space edge portal markers */}
+      {isWraparound && (
+        <div className="absolute inset-0 pointer-events-none rounded-2xl border border-dashed border-cyan-400/40 shadow-[inset_0_0_14px_rgba(34,211,238,0.12)] z-10">
+          <div className="absolute top-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
+            <span>▲▼ 空間穿越</span>
+          </div>
+          <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 px-2 py-0.2 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center gap-1 shadow-xs">
+            <span>▲▼ 空間穿越</span>
+          </div>
+          <div className="absolute left-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
+            <span>◀▶</span>
+          </div>
+          <div className="absolute right-0.5 top-1/2 -translate-y-1/2 px-1 py-0.5 rounded-full bg-cyan-950/90 border border-cyan-500/60 text-[8px] font-mono text-cyan-300 flex items-center shadow-xs">
+            <span>◀▶</span>
+          </div>
+        </div>
+      )}
+
       {/* Outer Lab Frame Decal */}
       <div
-        className={`absolute top-1 left-2 text-[9px] font-mono uppercase tracking-widest pointer-events-none transition-colors duration-300 ${theme.decalTextClass}`}
+        className={`absolute top-1 left-2 text-[9px] font-mono uppercase tracking-widest pointer-events-none transition-colors duration-300 ${
+          isWraparound ? 'text-cyan-400 font-bold' : theme.decalTextClass
+        }`}
       >
-        LAB MATRIX // {theme.badgeLabel.toUpperCase()}
+        {isWraparound
+          ? 'LAB MATRIX // TORUS WRAPAROUND 🔄'
+          : `LAB MATRIX // ${theme.badgeLabel.toUpperCase()}`}
       </div>
       <div className="absolute top-1 right-2 text-[9px] font-mono text-slate-500 pointer-events-none">
         DIM: {width}×{height}
@@ -106,7 +138,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
 
       {/* Grid Container */}
       <div
-        className="relative grid select-none touch-manipulation mx-auto"
+        className="relative grid select-none touch-manipulation mx-auto overflow-hidden rounded-xl"
         style={{
           gridTemplateColumns: `repeat(${width}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${height}, minmax(0, 1fr))`,
@@ -187,34 +219,57 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           </div>
         )}
 
-        {/* Chips Layer (Smooth CSS translation) */}
+        {/* Chips Layer (Continuous subpixel sliding + portal clone rendering) */}
         {chips.map((chip) => {
           const pushableDirs = pushableChipsMap.get(chip.id) || [];
+          const clones: { x: number; y: number }[] = [];
 
-          return (
+          if (isWraparound && chip.noTransition) {
+            if (chip.x < 1.0) clones.push({ x: chip.x + width, y: chip.y });
+            if (chip.x > width - 2.0) clones.push({ x: chip.x - width, y: chip.y });
+            if (chip.y < 1.0) clones.push({ x: chip.x, y: chip.y + height });
+            if (chip.y > height - 2.0) clones.push({ x: chip.x, y: chip.y - height });
+          }
+
+          const renderChipElement = (px: number, py: number, isClone: boolean) => (
             <div
-              key={chip.id}
-              className="absolute transition-all duration-150 ease-out z-20"
+              key={isClone ? `${chip.id}-clone` : chip.id}
+              className={`absolute z-20 ${
+                chip.noTransition
+                  ? 'transition-none'
+                  : 'transition-all duration-140 ease-out'
+              }`}
               style={{
                 width: `${100 / width}%`,
                 height: `${100 / height}%`,
-                left: `${(chip.x / width) * 100}%`,
-                top: `${(chip.y / height) * 100}%`,
+                left: `${(px / width) * 100}%`,
+                top: `${(py / height) * 100}%`,
               }}
             >
               <ChipCard
                 level={chip.level}
                 isMerging={chip.isMerging}
-                pushableDirections={pushableDirs}
-                onDirectPush={(d) => onPush(d)}
+                pushableDirections={isClone ? [] : pushableDirs}
+                onDirectPush={isClone ? undefined : (d) => onPush(d)}
               />
             </div>
+          );
+
+          return (
+            <React.Fragment key={chip.id}>
+              {renderChipElement(chip.x, chip.y, false)}
+              {clones.map((c, i) => renderChipElement(c.x, c.y, true))}
+            </React.Fragment>
           );
         })}
 
         {/* Einstein Scientist Sprite Layer */}
         <div
-          className="absolute transition-all duration-120 ease-out z-25 pointer-events-none"
+          className={`absolute z-25 pointer-events-none ${
+            isPlayerNoTransition
+              ? 'transition-none'
+              : 'transition-all duration-120 ease-out'
+          }`}
           style={{
             width: `${100 / width}%`,
             height: `${100 / height}%`,
@@ -227,6 +282,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
             isPushing={isPushing}
             isWalking={isWalking}
             isVictory={isVictory}
+            isKnockedOut={isKnockedOut}
           />
         </div>
       </div>

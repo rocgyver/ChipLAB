@@ -11,6 +11,7 @@ export interface Chip {
   y: number;
   level: number;
   isMerging?: boolean;
+  noTransition?: boolean;
 }
 
 export type CellType = 'EMPTY' | 'WALL' | 'OBSTACLE';
@@ -40,6 +41,7 @@ export interface LevelData {
   chips: { x: number; y: number; level: number }[];
   hint?: string;
   solutionSteps?: SolutionStep[];
+  wraparound?: boolean;
 }
 
 export interface GameSnapshot {

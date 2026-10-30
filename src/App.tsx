@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import {
   CellType,
   Chip,
@@ -14,6 +14,8 @@ import {
   findPathBFS,
   getDirectionDelta,
   isWalkable,
+  isLevelWraparound,
+  getEffectiveGrid,
 } from './utils/gameLogic';
 import { sounds } from './audio/soundEffects';
 import { GameBoard } from './components/GameBoard';
@@ -35,12 +37,17 @@ export default function App() {
   // Current active level
   const [currentLevel, setCurrentLevel] = useState<LevelData>(LEVELS[0]);
 
+  // Wraparound calculation & Effective Grid (outer walls removed for Level 7+)
+  const isWraparound = isLevelWraparound(currentLevel);
+  const effectiveGrid = useMemo(() => getEffectiveGrid(currentLevel), [currentLevel]);
+
   // Player position & state
   const [playerPos, setPlayerPos] = useState<Position>(LEVELS[0].playerStart);
   const [playerDir, setPlayerDir] = useState<Direction>('DOWN');
   const [isPushing, setIsPushing] = useState<boolean>(false);
   const [isWalking, setIsWalking] = useState<boolean>(false);
   const [isVictory, setIsVictory] = useState<boolean>(false);
+  const [isPlayerNoTransition, setIsPlayerNoTransition] = useState<boolean>(false);
 
   // Chips on the board
   const [chips, setChips] = useState<Chip[]>(() =>
@@ -75,6 +82,19 @@ export default function App() {
   });
   const [timeLeft, setTimeLeft] = useState<number>(() => getLevelTimeLimit(LEVELS[0]));
   const [isTimeOver, setIsTimeOver] = useState<boolean>(false);
+  const [isKnockedOut, setIsKnockedOut] = useState<boolean>(false);
+  const [catchMessage, setCatchMessage] = useState<string | null>(null);
+
+  // Real-time synchronization refs for live collision detection during sliding
+  const playerPosRef = useRef<Position>(playerPos);
+  playerPosRef.current = playerPos;
+  const playerDirRef = useRef<Direction>(playerDir);
+  playerDirRef.current = playerDir;
+  const chipsRef = useRef<Chip[]>(chips);
+  chipsRef.current = chips;
+  const slidingChipIdRef = useRef<string | null>(null);
+  const slidingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const animFrameRef = useRef<number | null>(null);
 
   const handleCycleTheme = useCallback(() => {
     setCurrentThemeId((prev) => {
@@ -124,9 +144,22 @@ export default function App() {
 
   // Load level helper
   const loadLevel = useCallback((lvl: LevelData) => {
+    if (slidingTimerRef.current) {
+      clearTimeout(slidingTimerRef.current);
+      slidingTimerRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    slidingChipIdRef.current = null;
+    setIsKnockedOut(false);
+    setCatchMessage(null);
     setCurrentLevel(lvl);
     setPlayerPos({ ...lvl.playerStart });
+    playerPosRef.current = { ...lvl.playerStart };
     setPlayerDir('DOWN');
+    playerDirRef.current = 'DOWN';
     setMoves(0);
     setHistory([]);
     setIsVictory(false);
@@ -135,14 +168,14 @@ export default function App() {
     setHintMessage(null);
     setTimeLeft(getLevelTimeLimit(lvl));
     setIsTimeOver(false);
-    setChips(
-      lvl.chips.map((c, i) => ({
-        id: `chip-${lvl.id}-${i}-${Date.now()}`,
-        x: c.x,
-        y: c.y,
-        level: c.level,
-      }))
-    );
+    const initialChips = lvl.chips.map((c, i) => ({
+      id: `chip-${lvl.id}-${i}-${Date.now()}`,
+      x: c.x,
+      y: c.y,
+      level: c.level,
+    }));
+    setChips(initialChips);
+    chipsRef.current = initialChips;
   }, []);
 
   // Save progress on victory
@@ -202,157 +235,407 @@ export default function App() {
 
   // Core movement & push handler
   const handleMove = useCallback(
-    (dir: Direction) => {
-      if (isBusyRef.current || isVictory || isTimeOver) return;
+    (dir: Direction, forceAction = false) => {
+      if (isVictory || isTimeOver || isKnockedOut) return;
+
+      // 1. If changing direction, turn in place first to face dir without stepping forward
+      if (!forceAction && playerDirRef.current !== dir) {
+        setPlayerDir(dir);
+        playerDirRef.current = dir;
+        sounds.playStep();
+        return;
+      }
+
+      setPlayerDir(dir);
+      playerDirRef.current = dir;
 
       const { dx, dy } = getDirectionDelta(dir);
-      setPlayerDir(dir);
+      const w = currentLevel.width;
+      const h = currentLevel.height;
 
-      const targetX = playerPos.x + dx;
-      const targetY = playerPos.y + dy;
+      const targetX = isWraparound
+        ? ((playerPosRef.current.x + dx) % w + w) % w
+        : playerPosRef.current.x + dx;
+      const targetY = isWraparound
+        ? ((playerPosRef.current.y + dy) % h + h) % h
+        : playerPosRef.current.y + dy;
 
       // Check if there is a chip directly in the target cell
-      const frontChip = chips.find((c) => c.x === targetX && c.y === targetY);
+      const frontChip = chipsRef.current.find((c) => c.x === targetX && c.y === targetY);
 
       if (frontChip) {
-        // Attempt to push the chip!
-        const pushResult = calculatePush(currentLevel.grid, chips, frontChip, dir);
-
-        if (pushResult.canPush) {
-          isBusyRef.current = true;
-          setIsPushing(true);
-          sounds.playPush();
-
-          // Save history snapshot before moving
-          setHistory((prev) => [
-            ...prev,
-            {
-              playerPos: { ...playerPos },
-              playerDir: dir,
-              chips: chips.map((c) => ({ ...c })),
-              moves,
-              actionDescription: `向${dir}推動晶片`,
-            },
-          ]);
-
-          setMoves((m) => m + 1);
-
-          if (pushResult.merged && pushResult.targetChipId) {
-            // Chip slides and collides with another chip of the same level
-            const targetChipId = pushResult.targetChipId;
-            const newLevel = pushResult.newLevel || frontChip.level + 1;
-
-            // Animate moving chip to final position
-            setChips((prev) =>
-              prev.map((c) =>
-                c.id === frontChip.id
-                  ? { ...c, x: pushResult.finalX!, y: pushResult.finalY! }
-                  : c
-              )
-            );
-
-            // Move Einstein into the tile previously occupied by frontChip
-            setPlayerPos({ x: targetX, y: targetY });
-
-            // After slide completes: fusion merge!
-            setTimeout(() => {
-              sounds.playMerge(newLevel);
-
-              setChips((prev) => {
-                const nextChips = prev
-                  .filter((c) => c.id !== frontChip.id)
-                  .map((c) =>
-                    c.id === targetChipId
-                      ? { ...c, level: newLevel, isMerging: true }
-                      : c
-                  );
-
-                // Check victory condition
-                if (
-                  nextChips.length === 1 &&
-                  nextChips[0].level === currentLevel.targetLevel
-                ) {
-                  setTimeout(() => {
-                    setIsVictory(true);
-                    sounds.playVictory();
-                  }, 250);
-                }
-
-                return nextChips;
-              });
-
-              // Remove merging pulse after brief moment
-              setTimeout(() => {
-                setChips((prev) =>
-                  prev.map((c) =>
-                    c.id === targetChipId ? { ...c, isMerging: false } : c
-                  )
-                );
-              }, 300);
-
-              setIsPushing(false);
-              isBusyRef.current = false;
-            }, 140);
-          } else {
-            // Pure slide without merge
-            setChips((prev) =>
-              prev.map((c) =>
-                c.id === frontChip.id
-                  ? { ...c, x: pushResult.finalX!, y: pushResult.finalY! }
-                  : c
-              )
-            );
-
-            // Move Einstein into the previous chip cell
-            setPlayerPos({ x: targetX, y: targetY });
-
-            setTimeout(() => {
-              setIsPushing(false);
-              isBusyRef.current = false;
-            }, 140);
-          }
-        } else {
-          // Cannot push (e.g. wall or different level chip immediately behind it)
+        // If a chip is already sliding, cannot start a second push
+        if (slidingChipIdRef.current !== null) {
           sounds.playBump();
+          return;
         }
+
+        // Check if cell behind frontChip in direction dir is walkable or mergeable
+        const nextX = isWraparound ? ((frontChip.x + dx) % w + w) % w : frontChip.x + dx;
+        const nextY = isWraparound ? ((frontChip.y + dy) % h + h) % h : frontChip.y + dy;
+
+        let isBlocked = false;
+        if (!isWraparound && (nextX < 0 || nextX >= w || nextY < 0 || nextY >= h)) {
+          isBlocked = true;
+        } else if (effectiveGrid[nextY][nextX] === 'WALL' || effectiveGrid[nextY][nextX] === 'OBSTACLE') {
+          isBlocked = true;
+        } else {
+          const blocker = chipsRef.current.find(
+            (c) => c.id !== frontChip.id && c.x === nextX && c.y === nextY
+          );
+          if (blocker && blocker.level !== frontChip.level) {
+            isBlocked = true;
+          }
+        }
+
+        // 2. Both hands push animation regardless of whether chip can slide!
+        setIsPushing(true);
+        setTimeout(() => setIsPushing(false), 240);
+
+        if (isBlocked) {
+          sounds.playBump();
+          return;
+        }
+
+        // 3. Einstein STAYS in place! Do not advance forward.
+        setHistory((prev) => [
+          ...prev,
+          {
+            playerPos: { ...playerPosRef.current },
+            playerDir: dir,
+            chips: chipsRef.current.map((c) => ({
+              ...c,
+              x: Math.round(c.x),
+              y: Math.round(c.y),
+              noTransition: false,
+              isMerging: false,
+            })),
+            moves,
+            actionDescription: `向${dir}推動晶片`,
+          },
+        ]);
+        setMoves((m) => m + 1);
+        sounds.playPush();
+
+        // Start continuous, completely smooth sliding physics loop for frontChip
+        slidingChipIdRef.current = frontChip.id;
+        const chipId = frontChip.id;
+        const startX = frontChip.x;
+        const startY = frontChip.y;
+        const slideDir = dir;
+
+        // 1 lap distance D = width or height
+        const D = isWraparound
+          ? (dx !== 0 ? w : h)
+          : (dx !== 0 ? (dx > 0 ? w - 1 - startX : startX) : (dy > 0 ? h - 1 - startY : startY));
+
+        // In wraparound: exactly 2 full laps (Lap 1 normal speed, Lap 2 friction deceleration)
+        const Smax = isWraparound ? 2 * D : D;
+
+        // Initial speed matching walking pace (5.5 tiles/sec)
+        const v0 = 5.5; // tiles/sec
+        // Time for Lap 1 (constant speed v0 over distance D):
+        const T1 = (D / v0) * 1000; // ms
+        // Time for Lap 2 (constant deceleration from v0 to 0 over distance D):
+        const T2 = ((2 * D) / v0) * 1000; // ms (= 2 * T1)
+        // Total duration for sliding:
+        const Ttotal = isWraparound ? T1 + T2 : (D / v0) * 1000;
+
+        const startTime = performance.now();
+        let lastCheckedTileIndex = 0;
+
+        const stopAndSnapChip = (finalTileX: number, finalTileY: number) => {
+          slidingChipIdRef.current = null;
+          if (animFrameRef.current) {
+            cancelAnimationFrame(animFrameRef.current);
+            animFrameRef.current = null;
+          }
+          setChips((prev) =>
+            prev.map((c) =>
+              c.id === chipId
+                ? { ...c, x: finalTileX, y: finalTileY, noTransition: false }
+                : c
+            )
+          );
+          chipsRef.current = chipsRef.current.map((c) =>
+            c.id === chipId ? { ...c, x: finalTileX, y: finalTileY, noTransition: false } : c
+          );
+        };
+
+        const updatePhysicsFrame = (now: number) => {
+          const elapsed = now - startTime;
+          let s: number;
+
+          if (isWraparound) {
+            if (elapsed <= T1) {
+              // Lap 1: constant normal speed v0
+              const p1 = Math.min(1.0, elapsed / T1);
+              s = D * p1;
+            } else {
+              // Lap 2: kinetic friction deceleration from v0 to 0 over distance D
+              const elapsed2 = elapsed - T1;
+              const p2 = Math.min(1.0, elapsed2 / T2);
+              s = D + D * (2 * p2 - p2 * p2);
+            }
+          } else {
+            const p = Math.min(1.0, elapsed / Ttotal);
+            s = D * p;
+          }
+
+          // Check collisions as leading edge enters new tiles
+          const currentTileIdx = Math.min(Smax, Math.floor(s + 0.5));
+
+          while (lastCheckedTileIndex < currentTileIdx) {
+            const k = lastCheckedTileIndex + 1;
+            const tkX = isWraparound ? (((startX + dx * k) % w) + w) % w : startX + dx * k;
+            const tkY = isWraparound ? (((startY + dy * k) % h) + h) % h : startY + dy * k;
+            const prevX = isWraparound ? (((startX + dx * (k - 1)) % w) + w) % w : startX + dx * (k - 1);
+            const prevY = isWraparound ? (((startY + dy * (k - 1)) % h) + h) % h : startY + dy * (k - 1);
+
+            // 1. Wall or Obstacle Check
+            if (!isWraparound && (tkX < 0 || tkX >= w || tkY < 0 || tkY >= h)) {
+              stopAndSnapChip(prevX, prevY);
+              sounds.playBump();
+              return;
+            }
+            if (effectiveGrid[tkY][tkX] === 'WALL' || effectiveGrid[tkY][tkX] === 'OBSTACLE') {
+              stopAndSnapChip(prevX, prevY);
+              sounds.playBump();
+              return;
+            }
+
+            // 2. Collision with Other Chip
+            const other = chipsRef.current.find(
+              (c) => c.id !== chipId && c.x === tkX && c.y === tkY
+            );
+            if (other) {
+              const movingChip = chipsRef.current.find((c) => c.id === chipId);
+              if (movingChip && movingChip.level === other.level) {
+                // FUSION MERGE!
+                const newLevel = movingChip.level + 1;
+                slidingChipIdRef.current = null;
+                if (animFrameRef.current) {
+                  cancelAnimationFrame(animFrameRef.current);
+                  animFrameRef.current = null;
+                }
+                sounds.playMerge(newLevel);
+                setChips((prev) => {
+                  const nextChips = prev
+                    .filter((c) => c.id !== chipId)
+                    .map((c) =>
+                      c.id === other.id
+                        ? { ...c, level: newLevel, isMerging: true, noTransition: false }
+                        : c
+                    );
+                  chipsRef.current = nextChips;
+                  if (
+                    nextChips.length === 1 &&
+                    nextChips[0].level === currentLevel.targetLevel
+                  ) {
+                    setTimeout(() => {
+                      setIsVictory(true);
+                      sounds.playVictory();
+                    }, 200);
+                  }
+                  return nextChips;
+                });
+                setTimeout(() => {
+                  setChips((prev) =>
+                    prev.map((c) => (c.id === other.id ? { ...c, isMerging: false } : c))
+                  );
+                }, 300);
+                return;
+              } else {
+                // Stopped by different level chip in front of it
+                stopAndSnapChip(prevX, prevY);
+                sounds.playBump();
+                return;
+              }
+            }
+
+            // 3. Collision with Einstein!
+            const curP = playerPosRef.current;
+            const curD = playerDirRef.current;
+            if (curP.x === tkX && curP.y === tkY) {
+              const oppositeDir: Record<Direction, Direction> = {
+                UP: 'DOWN',
+                DOWN: 'UP',
+                LEFT: 'RIGHT',
+                RIGHT: 'LEFT',
+              };
+
+              if (curD === oppositeDir[slideDir]) {
+                // EINSTEIN FACES CHIP HEAD-ON: CATCH & BLOCK!
+                stopAndSnapChip(prevX, prevY);
+                setIsPushing(true);
+                sounds.playCatch();
+                setCatchMessage('✋ 成功防禦！博士及時轉身將迎面而來的晶片穩穩擋下！');
+                setTimeout(() => {
+                  setIsPushing(false);
+                  setCatchMessage(null);
+                }, 2200);
+                return;
+              } else {
+                // EINSTEIN CAUGHT OFF-GUARD: KNOCKOUT!
+                stopAndSnapChip(tkX, tkY);
+                setIsKnockedOut(true);
+                sounds.playKnockout();
+                return;
+              }
+            }
+
+            // Tile is clear, advance check index
+            lastCheckedTileIndex = k;
+          }
+
+          // 4. If full sliding completed (elapsed >= Ttotal or s >= Smax)
+          if (elapsed >= Ttotal || s >= Smax) {
+            // Friction smoothly brought chip to rest right back at start position!
+            stopAndSnapChip(startX, startY);
+            sounds.playBump();
+            return;
+          }
+
+          // 5. Continuous Sub-Pixel Visual Coordinate Calculation
+          const rawX = startX + dx * s;
+          const rawY = startY + dy * s;
+
+          let renderX: number;
+          let renderY: number;
+
+          if (isWraparound) {
+            renderX = ((rawX % w) + w) % w;
+            renderY = ((rawY % h) + h) % h;
+          } else {
+            renderX = rawX;
+            renderY = rawY;
+          }
+
+          // Update position at 60fps without CSS transition
+          setChips((prev) =>
+            prev.map((c) =>
+              c.id === chipId
+                ? { ...c, x: renderX, y: renderY, noTransition: true }
+                : c
+            )
+          );
+
+          // Request next frame
+          animFrameRef.current = requestAnimationFrame(updatePhysicsFrame);
+        };
+
+        animFrameRef.current = requestAnimationFrame(updatePhysicsFrame);
         return;
       }
 
       // Empty floor: Walk forward
-      if (isWalkable(currentLevel.grid, targetX, targetY, chips)) {
-        // Save history snapshot
-        setHistory((prev) => [
-          ...prev,
-          {
-            playerPos: { ...playerPos },
-            playerDir: dir,
-            chips: chips.map((c) => ({ ...c })),
-            moves,
-            actionDescription: '移動一步',
-          },
-        ]);
+      if (isWalkable(effectiveGrid, targetX, targetY, chipsRef.current, isWraparound)) {
+        // ONLY record walk step into history when NOT actively sliding!
+        // While a chip is sliding, Einstein is dodging/reacting to the in-flight push turn;
+        // recording intermediate states would capture floating subpixel positions into history.
+        if (slidingChipIdRef.current === null) {
+          setHistory((prev) => [
+            ...prev,
+            {
+              playerPos: { ...playerPosRef.current },
+              playerDir: dir,
+              chips: chipsRef.current.map((c) => ({
+                ...c,
+                x: Math.round(c.x),
+                y: Math.round(c.y),
+                noTransition: false,
+                isMerging: false,
+              })),
+              moves,
+              actionDescription: '移動一步',
+            },
+          ]);
+        }
 
-        setPlayerPos({ x: targetX, y: targetY });
-        setIsWalking(true);
-        sounds.playStep();
-        setTimeout(() => setIsWalking(false), 80);
+        const playerWrapped =
+          Math.abs(targetX - playerPosRef.current.x) > 1 ||
+          Math.abs(targetY - playerPosRef.current.y) > 1;
+
+        if (playerWrapped) {
+          isBusyRef.current = true;
+          setIsWalking(true);
+          sounds.playStep();
+
+          const exitP: Position = { x: playerPosRef.current.x + dx, y: playerPosRef.current.y + dy };
+          let entryP: Position;
+          if (dx === 1) entryP = { x: -1, y: targetY };
+          else if (dx === -1) entryP = { x: w, y: targetY };
+          else if (dy === 1) entryP = { x: targetX, y: -1 };
+          else entryP = { x: targetX, y: h };
+
+          setIsPlayerNoTransition(false);
+          setPlayerPos(exitP);
+
+          setTimeout(() => {
+            setIsPlayerNoTransition(true);
+            setPlayerPos(entryP);
+
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setIsPlayerNoTransition(false);
+                setPlayerPos({ x: targetX, y: targetY });
+                playerPosRef.current = { x: targetX, y: targetY };
+
+                setTimeout(() => {
+                  setIsWalking(false);
+                  isBusyRef.current = false;
+                }, 60);
+              });
+            });
+          }, 60);
+        } else {
+          setPlayerPos({ x: targetX, y: targetY });
+          playerPosRef.current = { x: targetX, y: targetY };
+          setIsWalking(true);
+          sounds.playStep();
+          setTimeout(() => setIsWalking(false), 70);
+        }
       } else {
-        // Hit a wall
+        // Bump against wall/obstacle
         sounds.playBump();
       }
     },
-    [chips, currentLevel, isVictory, moves, playerPos]
+    [currentLevel, effectiveGrid, isKnockedOut, isTimeOver, isVictory, isWraparound, moves]
   );
 
   // Undo move
   const handleUndo = useCallback(() => {
-    if (history.length === 0 || isBusyRef.current) return;
+    if (history.length === 0) return;
+    if (slidingTimerRef.current) {
+      clearTimeout(slidingTimerRef.current);
+      slidingTimerRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    slidingChipIdRef.current = null;
+    setIsKnockedOut(false);
+    setIsPushing(false);
+    setCatchMessage(null);
 
     const previous = history[history.length - 1];
     setHistory((prev) => prev.slice(0, -1));
     setPlayerPos(previous.playerPos);
+    playerPosRef.current = previous.playerPos;
     setPlayerDir(previous.playerDir);
-    setChips(previous.chips);
+    playerDirRef.current = previous.playerDir;
+
+    // Ensure all restored chips have pristine integer grid coordinates and reset flags
+    const cleanChips = previous.chips.map((c) => ({
+      ...c,
+      x: Math.round(c.x),
+      y: Math.round(c.y),
+      noTransition: false,
+      isMerging: false,
+    }));
+    setChips(cleanChips);
+    chipsRef.current = cleanChips;
     setMoves(previous.moves);
     setIsVictory(false);
     sounds.playUndo();
@@ -362,6 +645,17 @@ export default function App() {
   const handleReset = useCallback(() => {
     autoPlayAbortRef.current = true;
     setIsAutoPlaying(false);
+    if (slidingTimerRef.current) {
+      clearTimeout(slidingTimerRef.current);
+      slidingTimerRef.current = null;
+    }
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    slidingChipIdRef.current = null;
+    setIsKnockedOut(false);
+    setCatchMessage(null);
     loadLevel(currentLevel);
     sounds.playStep();
   }, [currentLevel, loadLevel]);
@@ -400,27 +694,48 @@ export default function App() {
   // Click on tile (Pathfinding to walk or direct push)
   const handleTileClick = useCallback(
     (tx: number, ty: number) => {
-      if (isBusyRef.current || isVictory || isTimeOver) return;
+      if (isBusyRef.current || isVictory || isTimeOver || isKnockedOut) return;
+
+      const w = currentLevel.width;
+      const h = currentLevel.height;
 
       // Check if clicking directly adjacent chip in front of Einstein
-      const frontX = playerPos.x;
-      const frontY = playerPos.y;
-
       const chipAtClick = chips.find((c) => c.x === tx && c.y === ty);
       if (chipAtClick) {
-        // Is it 1 tile away cardinally?
-        const dx = tx - frontX;
-        const dy = ty - frontY;
-        if (Math.abs(dx) + Math.abs(dy) === 1) {
-          const dir: Direction =
-            dx === 1 ? 'RIGHT' : dx === -1 ? 'LEFT' : dy === 1 ? 'DOWN' : 'UP';
+        let isAdjacent = false;
+        let dir: Direction = 'RIGHT';
+
+        if (isWraparound) {
+          if ((playerPos.x + 1) % w === tx && playerPos.y === ty) {
+            isAdjacent = true;
+            dir = 'RIGHT';
+          } else if (((playerPos.x - 1 + w) % w) === tx && playerPos.y === ty) {
+            isAdjacent = true;
+            dir = 'LEFT';
+          } else if (playerPos.x === tx && (playerPos.y + 1) % h === ty) {
+            isAdjacent = true;
+            dir = 'DOWN';
+          } else if (playerPos.x === tx && ((playerPos.y - 1 + h) % h) === ty) {
+            isAdjacent = true;
+            dir = 'UP';
+          }
+        } else {
+          const dx = tx - playerPos.x;
+          const dy = ty - playerPos.y;
+          if (Math.abs(dx) + Math.abs(dy) === 1) {
+            isAdjacent = true;
+            dir = dx === 1 ? 'RIGHT' : dx === -1 ? 'LEFT' : dy === 1 ? 'DOWN' : 'UP';
+          }
+        }
+
+        if (isAdjacent) {
           handleMove(dir);
           return;
         }
       }
 
       // Else: Empty tile -> BFS pathfinding walk
-      const path = findPathBFS(currentLevel.grid, playerPos, { x: tx, y: ty }, chips);
+      const path = findPathBFS(effectiveGrid, playerPos, { x: tx, y: ty }, chips, isWraparound);
       if (!path || path.length === 0) {
         sounds.playBump();
         return;
@@ -440,24 +755,52 @@ export default function App() {
 
         const next = path[stepIndex];
         const cur = stepIndex === 0 ? playerPos : path[stepIndex - 1];
-        const dir: Direction =
-          next.x > cur.x
-            ? 'RIGHT'
-            : next.x < cur.x
-            ? 'LEFT'
-            : next.y > cur.y
-            ? 'DOWN'
-            : 'UP';
+
+        let dir: Direction = 'DOWN';
+        if (next.x === (cur.x + 1) % w) dir = 'RIGHT';
+        else if (next.x === (cur.x - 1 + w) % w) dir = 'LEFT';
+        else if (next.y === (cur.y + 1) % h) dir = 'DOWN';
+        else if (next.y === (cur.y - 1 + h) % h) dir = 'UP';
+
+        const isWrap =
+          Math.abs(next.x - cur.x) > 1 || Math.abs(next.y - cur.y) > 1;
 
         setPlayerDir(dir);
-        setPlayerPos(next);
         sounds.playStep();
         setIsWalking(true);
 
+        if (isWrap) {
+          const { dx: ddx, dy: ddy } = getDirectionDelta(dir);
+          const exitP: Position = { x: cur.x + ddx, y: cur.y + ddy };
+          let entryP: Position;
+          if (ddx === 1) entryP = { x: -1, y: next.y };
+          else if (ddx === -1) entryP = { x: w, y: next.y };
+          else if (ddy === 1) entryP = { x: next.x, y: -1 };
+          else entryP = { x: next.x, y: h };
+
+          setIsPlayerNoTransition(false);
+          setPlayerPos(exitP);
+
+          setTimeout(() => {
+            setIsPlayerNoTransition(true);
+            setPlayerPos(entryP);
+
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                setIsPlayerNoTransition(false);
+                setPlayerPos(next);
+              });
+            });
+          }, 35);
+        } else {
+          setIsPlayerNoTransition(false);
+          setPlayerPos(next);
+        }
+
         stepIndex++;
-      }, 75);
+      }, 85);
     },
-    [chips, currentLevel.grid, handleMove, isVictory, playerPos]
+    [chips, currentLevel.height, currentLevel.width, effectiveGrid, handleMove, isTimeOver, isVictory, isWraparound, playerPos]
   );
 
   // Keyboard navigation
@@ -712,32 +1055,87 @@ export default function App() {
           </div>
         )}
 
+        {/* Catch / Block Toast Banner */}
+        {catchMessage && (
+          <div className="w-full max-w-2xl mb-3 px-4 py-2.5 rounded-xl bg-cyan-950/90 border border-cyan-400/80 text-cyan-200 text-xs flex items-center justify-between gap-3 shadow-lg shadow-cyan-950/50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-2">
+              <span className="text-base">✋</span>
+              <span className="font-bold">{catchMessage}</span>
+            </div>
+          </div>
+        )}
+
         {/* Game Grid Board */}
         <div className="w-full flex items-center justify-center my-auto">
           <GameBoard
-            grid={currentLevel.grid}
+            grid={effectiveGrid}
             width={currentLevel.width}
             height={currentLevel.height}
+            isWraparound={isWraparound}
+            isPlayerNoTransition={isPlayerNoTransition}
             playerPos={playerPos}
             playerDir={playerDir}
             isPushing={isPushing}
             isWalking={isWalking}
             isVictory={isVictory}
+            isKnockedOut={isKnockedOut}
             isAmbientOn={isAmbientOn}
             theme={BOARD_THEMES[currentThemeId]}
             chips={chips}
             onTileClick={handleTileClick}
-            onPush={handleMove}
+            onPush={(d) => handleMove(d, true)}
           />
         </div>
 
-        {/* Mobile Virtual D-Pad */}
-        <DpadControls
-          onDirectionMove={handleMove}
-          onUndo={handleUndo}
-          onReset={handleReset}
-          canUndo={history.length > 0}
-        />
+        {/* Lower Control & Failure Alert Section (Below GameBoard) */}
+        <div className="relative w-full max-w-sm sm:max-w-2xl mx-auto mt-2 min-h-[96px] md:min-h-0 flex items-center justify-center">
+          {/* Mobile Virtual D-Pad */}
+          <DpadControls
+            onDirectionMove={handleMove}
+            onUndo={handleUndo}
+            onReset={handleReset}
+            canUndo={history.length > 0}
+          />
+
+          {/* Knocked Out Failure Alert Banner (Placed below GameBoard, covers virtual controls when knocked out) */}
+          {isKnockedOut && (
+            <div className="absolute inset-0 md:static z-30 flex items-center justify-center animate-in zoom-in-95 duration-200">
+              <div className="w-full h-full md:h-auto p-3.5 sm:p-4 rounded-xl bg-red-950/95 border-2 border-red-500 text-red-100 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xl shadow-red-950/80 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-900/80 border border-red-400 flex items-center justify-center shrink-0 text-xl shadow-inner">
+                    💥
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-red-200 flex items-center gap-2">
+                      <span>挑戰失敗：博士被高速晶片撞倒！</span>
+                    </h4>
+                    <p className="text-xs text-red-300/90 mt-0.5 line-clamp-2 sm:line-clamp-none">
+                      晶片在環狀空間中高速折返！請及時閃開跳至鄰格，或轉身面對晶片伸手擋下！
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto mt-1 sm:mt-0">
+                  {history.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleUndo}
+                      className="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-bold text-xs cursor-pointer shadow-sm transition-all whitespace-nowrap"
+                    >
+                      復原上一步 (U)
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="flex-1 sm:flex-initial px-3.5 py-1.5 rounded-lg bg-red-500 hover:bg-red-400 active:scale-95 text-slate-950 font-bold text-xs cursor-pointer shadow-sm transition-all whitespace-nowrap"
+                  >
+                    重新挑戰 (R)
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
 
       {/* DOS Terminal Status Bar */}

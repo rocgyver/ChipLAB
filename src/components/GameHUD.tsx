@@ -76,6 +76,11 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             <span>{currentLevel.chapterName}</span>
             <span>·</span>
             <span>第 {currentLevel.id} 關</span>
+            {(currentLevel.wraparound || currentLevel.id >= 7) && (
+              <span className="px-1.5 py-0.2 rounded bg-cyan-950/90 text-cyan-300 border border-cyan-600/60 text-[10px] flex items-center gap-1 font-bold">
+                <span>🔄 環狀邊界空間</span>
+              </span>
+            )}
           </div>
           <h2 className="text-base sm:text-lg font-bold text-white tracking-tight truncate">
             {currentLevel.title}

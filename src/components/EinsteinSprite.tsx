@@ -6,6 +6,7 @@ interface EinsteinSpriteProps {
   isPushing: boolean;
   isWalking: boolean;
   isVictory?: boolean;
+  isKnockedOut?: boolean;
   className?: string;
 }
 
@@ -14,26 +15,40 @@ export const EinsteinSprite: React.FC<EinsteinSpriteProps> = ({
   isPushing,
   isWalking,
   isVictory = false,
+  isKnockedOut = false,
   className = '',
 }) => {
   return (
     <div
-      className={`relative w-full h-full flex items-center justify-center pointer-events-none transition-transform duration-100 ${
-        isPushing ? 'scale-105' : ''
+      className={`relative w-full h-full flex items-center justify-center pointer-events-none transition-transform duration-150 ${
+        isKnockedOut
+          ? 'rotate-90 translate-y-2 opacity-85'
+          : isPushing
+          ? 'scale-105'
+          : ''
       } ${className}`}
     >
       <svg
         viewBox="0 0 48 48"
         className={`w-full h-full filter drop-shadow-md select-none ${
-          isWalking ? 'animate-bounce' : ''
+          isWalking && !isKnockedOut ? 'animate-bounce' : ''
         } ${isVictory ? 'animate-pulse' : ''}`}
         style={{ animationDuration: isWalking ? '0.35s' : '1.2s' }}
       >
         {/* Shadow */}
         <ellipse cx="24" cy="44" rx="14" ry="3.5" fill="rgba(0,0,0,0.4)" />
 
+        {/* Knocked Out Stun Stars */}
+        {isKnockedOut && (
+          <g className="animate-spin" style={{ transformOrigin: '24px 10px', animationDuration: '1.2s' }}>
+            <polygon points="24,2 25.5,5 29,5.5 26.5,7.5 27.5,11 24,9 20.5,11 21.5,7.5 19,5.5 22.5,5" fill="#facc15" stroke="#ca8a04" strokeWidth="0.5" />
+            <polygon points="13,8 14.5,11 18,11.5 15.5,13.5 16.5,17 13,15 9.5,17 10.5,13.5 8,11.5 11.5,11" fill="#38bdf8" stroke="#0284c7" strokeWidth="0.5" />
+            <polygon points="35,8 36.5,11 40,11.5 37.5,13.5 38.5,17 35,15 31.5,17 32.5,13.5 30,11.5 33.5,11" fill="#f43f5e" stroke="#be123c" strokeWidth="0.5" />
+          </g>
+        )}
+
         {/* Victory Eureka Lightbulb above head */}
-        {isVictory && (
+        {isVictory && !isKnockedOut && (
           <g className="animate-bounce" style={{ animationDuration: '0.6s' }}>
             <circle cx="24" cy="4" r="4.5" fill="#facc15" stroke="#ca8a04" strokeWidth="1" />
             <path d="M22 8.5h4v1.5h-4z" fill="#94a3b8" />

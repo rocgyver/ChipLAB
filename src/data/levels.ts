@@ -734,16 +734,17 @@ export const LEVELS: VerifiedLevelData[] = [
     "id": 7,
     "chapter": 2,
     "chapterName": "第二章：電路迴廊",
-    "title": "長廊測試 (The Corridor)",
-    "subtitle": "在有立柱緩衝的通道中精確調度兩顆晶片",
+    "title": "環狀長廊 (The Torus Corridor)",
+    "subtitle": "空間邊界已解鎖！向左滑出邊界，將從右側邊緣高速折返！",
     "width": 9,
     "height": 7,
+    "wraparound": true,
     "playerStart": {
-      "x": 1,
-      "y": 1
+      "x": 3,
+      "y": 3
     },
     "targetLevel": 2,
-    "parMoves": 3,
+    "parMoves": 1,
     "grid": [
       [
         "WALL",
@@ -826,41 +827,23 @@ export const LEVELS: VerifiedLevelData[] = [
     "chips": [
       {
         "x": 2,
-        "y": 2,
+        "y": 3,
         "level": 1
       },
       {
-        "x": 6,
-        "y": 4,
+        "x": 7,
+        "y": 3,
         "level": 1
       }
     ],
-    "hint": "走至 (2, 1) 將左側晶片向下推到 (2, 5)，再將右側晶片向上推到 (6, 1)，隨後水平對齊碰撞！",
+    "hint": "站在 (3, 3) 向左推動！晶片滑出左側邊界後，將以環狀空間從最右側邊緣飛出，並撞擊右方晶片！",
     "solutionSteps": [
       {
-        "standX": 2,
-        "standY": 1,
-        "dir": "DOWN",
-        "chipX": 2,
-        "chipY": 2,
-        "chipLevel": 1,
-        "merged": false
-      },
-      {
-        "standX": 6,
+        "standX": 3,
         "standY": 3,
-        "dir": "DOWN",
-        "chipX": 6,
-        "chipY": 4,
-        "chipLevel": 1,
-        "merged": false
-      },
-      {
-        "standX": 7,
-        "standY": 5,
         "dir": "LEFT",
-        "chipX": 6,
-        "chipY": 5,
+        "chipX": 2,
+        "chipY": 3,
         "chipLevel": 1,
         "merged": true
       }
@@ -870,8 +853,8 @@ export const LEVELS: VerifiedLevelData[] = [
     "id": 8,
     "chapter": 2,
     "chapterName": "第二章：電路迴廊",
-    "title": "隔間試驗 (Chamber Partition)",
-    "subtitle": "穿梭於兩個實驗隔間之間，通過中間通道完成合成",
+    "title": "隔間穿梭 (Chamber Warp)",
+    "subtitle": "穿越中央隔間，或利用左右邊界環狀折返進行空間包抄！",
     "width": 9,
     "height": 7,
     "playerStart": {
@@ -976,7 +959,7 @@ export const LEVELS: VerifiedLevelData[] = [
         "level": 2
       }
     ],
-    "hint": "在左室將兩顆 Level 1 縱向相撞合成為 Level 2，再推過中央門槽 (4, 3) 與右室 Level 2 碰撞！",
+    "hint": "在左室將兩顆 Level 1 縱向相撞合為 Level 2，接著向左滑出邊界（或向右穿過隔間門）與右室晶片完美結合！",
     "solutionSteps": [
       {
         "standX": 2,
