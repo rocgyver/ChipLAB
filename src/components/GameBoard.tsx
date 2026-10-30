@@ -109,19 +109,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
         <div className="absolute inset-0 pointer-events-none rounded-none border border-dashed border-cyan-400/30 shadow-[inset_0_0_14px_rgba(34,211,238,0.10)] z-10" />
       )}
 
-      {/* Outer Lab Frame Decal */}
-      <div
-        className={`absolute top-1 left-2 text-[9px] font-mono uppercase tracking-widest pointer-events-none transition-colors duration-300 ${
-          isWraparound ? 'text-cyan-400 font-bold' : theme.decalTextClass
-        }`}
-      >
-        {isWraparound
-          ? 'LAB MATRIX // TORUS WRAPAROUND 🔄'
-          : `LAB MATRIX // ${theme.badgeLabel.toUpperCase()}`}
-      </div>
-      <div className="absolute top-1 right-2 text-[9px] font-mono text-slate-500 pointer-events-none">
-        DIM: {width}×{height}
-      </div>
+
 
       {/* Grid Container */}
       <div

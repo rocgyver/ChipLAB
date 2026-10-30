@@ -317,6 +317,14 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           >
             {isMuted ? <VolumeX className="w-3.5 h-3.5 text-rose-400" /> : <Volume2 className="w-3.5 h-3.5 text-emerald-400" />}
           </button>
+
+          {/* Board Dimensions Badge (DIM) */}
+          <div
+            title={`棋盤尺寸: ${currentLevel.width} 列 × ${currentLevel.height} 行`}
+            className="px-2 py-1 rounded-none bg-slate-950/80 border border-slate-700/80 text-[10px] font-mono text-slate-300 tracking-wider font-bold whitespace-nowrap select-none"
+          >
+            DIM: {currentLevel.width}×{currentLevel.height}
+          </div>
         </div>
       </div>
     </div>
