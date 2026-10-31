@@ -43,30 +43,26 @@ export const GameBoard: React.FC<GameBoardProps> = ({
   onTileClick,
   onPush,
 }) => {
-  // Check which chips are adjacent to Einstein and in what direction they can be pushed
+  // Check which chip Einstein is directly facing and can push
   const pushableChipsMap = useMemo(() => {
     const map = new Map<string, Direction[]>();
-    const dirs: Direction[] = ['UP', 'DOWN', 'LEFT', 'RIGHT'];
 
-    dirs.forEach((d) => {
-      const { dx, dy } = getDirectionDelta(d);
-      const adjX = isWraparound ? ((playerPos.x + dx) % width + width) % width : playerPos.x + dx;
-      const adjY = isWraparound ? ((playerPos.y + dy) % height + height) % height : playerPos.y + dy;
+    // The push button should ONLY appear on the chip Einstein is truly facing
+    const { dx, dy } = getDirectionDelta(playerDir);
+    const frontX = isWraparound ? ((playerPos.x + dx) % width + width) % width : playerPos.x + dx;
+    const frontY = isWraparound ? ((playerPos.y + dy) % height + height) % height : playerPos.y + dy;
 
-      const chip = chips.find((c) => c.x === adjX && c.y === adjY);
-      if (chip) {
-        // Can Einstein push it in direction `d`?
-        const result = calculatePush(grid, chips, chip, d, isWraparound);
-        if (result.canPush) {
-          const list = map.get(chip.id) || [];
-          list.push(d);
-          map.set(chip.id, list);
-        }
+    const frontChip = chips.find((c) => c.x === frontX && c.y === frontY);
+    if (frontChip) {
+      // Can Einstein push it in direction `playerDir`?
+      const result = calculatePush(grid, chips, frontChip, playerDir, isWraparound);
+      if (result.canPush) {
+        map.set(frontChip.id, [playerDir]);
       }
-    });
+    }
 
     return map;
-  }, [chips, playerPos, grid, isWraparound, width, height]);
+  }, [chips, playerPos, playerDir, grid, isWraparound, width, height]);
 
   // Compute laser trajectory preview for the chip immediately in front of Einstein
   const laserTrajectory = useMemo(() => {

@@ -26,6 +26,48 @@ export const ChipCard: React.FC<ChipCardProps> = ({
   const isSupercomputer = level === 8;
   const isQuantum = level === 7;
 
+  // Render compact view (number-only mode with authentic IC pins & notch)
+  const renderCompactView = () => (
+    <div className="relative w-full h-full flex flex-col items-center justify-between overflow-hidden">
+      {/* Top Header: Pin-1 Index Notch */}
+      <div className="w-full flex items-center justify-center pt-0 z-10">
+        <div className="w-1.5 h-0.5 bg-slate-950 border-b border-l border-r border-slate-700 -mt-0.5 opacity-90" />
+      </div>
+
+      {/* Dual-in-line Pins on Left & Right (2 pins per side for ultra-compact scaling) */}
+      <div className="absolute left-0 top-1 bottom-1 flex flex-col justify-around py-0.5 pointer-events-none">
+        {[0, 1].map((i) => (
+          <div
+            key={`c-pin-l-${i}`}
+            className="w-0.5 h-1 -ml-0.5 rounded-none bg-gradient-to-r from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-xs"
+          />
+        ))}
+      </div>
+      <div className="absolute right-0 top-1 bottom-1 flex flex-col justify-around py-0.5 pointer-events-none">
+        {[0, 1].map((i) => (
+          <div
+            key={`c-pin-r-${i}`}
+            className="w-0.5 h-1 -mr-0.5 rounded-none bg-gradient-to-l from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-xs"
+          />
+        ))}
+      </div>
+
+      {/* Center Bold Number */}
+      <div className="flex-1 flex items-center justify-center text-center w-full h-full z-10 leading-none px-1">
+        <span
+          className="font-black font-mono leading-none tracking-tighter select-none"
+          style={{
+            color: def.borderColor,
+            textShadow: `0 0 6px ${def.glowColor}`,
+            fontSize: 'clamp(10px, 48cqw, 20px)',
+          }}
+        >
+          {isSupercomputer ? '8★' : level}
+        </span>
+      </div>
+    </div>
+  );
+
   return (
     <div
       className={`@container relative w-full h-full select-none flex items-center justify-center p-0.5 ${
@@ -47,34 +89,14 @@ export const ChipCard: React.FC<ChipCardProps> = ({
           boxShadow: `0 4px 12px ${def.glowColor}, inset 0 1px 1px rgba(255,255,255,0.2)`,
         }}
       >
-        {/* If numberOnly or compact space: Render ONLY the number */}
+        {/* If numberOnly: Force compact view with pins and notch */}
         {numberOnly ? (
-          <div className="flex-1 flex items-center justify-center text-center w-full h-full z-10 leading-none">
-            <span
-              className="font-black font-mono leading-none tracking-tighter select-none"
-              style={{
-                color: def.borderColor,
-                textShadow: `0 0 6px ${def.glowColor}`,
-                fontSize: 'clamp(11px, 52cqw, 22px)',
-              }}
-            >
-              {isSupercomputer ? '8★' : level}
-            </span>
-          </div>
+          renderCompactView()
         ) : (
           <>
-            {/* Auto-responsive: On very small containers (<46px), show number-only */}
-            <div className="flex @[46px]:hidden flex-1 items-center justify-center text-center w-full h-full z-10 leading-none">
-              <span
-                className="font-black font-mono leading-none tracking-tighter select-none"
-                style={{
-                  color: def.borderColor,
-                  textShadow: `0 0 6px ${def.glowColor}`,
-                  fontSize: 'clamp(10px, 52cqw, 20px)',
-                }}
-              >
-                {isSupercomputer ? '8★' : level}
-              </span>
+            {/* Auto-responsive: On very small containers (<46px), show compact view */}
+            <div className="flex @[46px]:hidden w-full h-full">
+              {renderCompactView()}
             </div>
 
             {/* Detailed IC Silkscreen view: only visible when space permits (>=46px) */}
@@ -146,7 +168,7 @@ export const ChipCard: React.FC<ChipCardProps> = ({
         )}
       </div>
 
-      {/* Push Directional Arrows (if scientist is adjacent and can push in that direction) */}
+      {/* Push Directional Arrows: Flashing Pale Pink Arrow */}
       {pushableDirections.map((dir) => {
         let posClass = '';
         let arrowIcon = '▶';
@@ -173,7 +195,7 @@ export const ChipCard: React.FC<ChipCardProps> = ({
               onDirectPush?.(dir);
             }}
             title={`向${dir === 'UP' ? '上' : dir === 'DOWN' ? '下' : dir === 'LEFT' ? '左' : '右'}推動`}
-            className={`absolute ${posClass} z-30 w-4 h-4 rounded-none bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-[9px] flex items-center justify-center shadow-md animate-pulse cursor-pointer border border-amber-200 transition-transform hover:scale-125`}
+            className={`absolute ${posClass} z-30 w-4 h-4 rounded-none bg-pink-300 hover:bg-pink-200 text-pink-950 font-black text-[9px] flex items-center justify-center shadow-[0_0_8px_rgba(244,114,182,0.7)] animate-pulse cursor-pointer border border-pink-100 transition-transform hover:scale-125`}
           >
             {arrowIcon}
           </button>
