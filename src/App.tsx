@@ -270,29 +270,14 @@ export default function App() {
           return;
         }
 
-        // Check if cell behind frontChip in direction dir is walkable or mergeable
-        const nextX = isWraparound ? ((frontChip.x + dx) % w + w) % w : frontChip.x + dx;
-        const nextY = isWraparound ? ((frontChip.y + dy) % h + h) % h : frontChip.y + dy;
-
-        let isBlocked = false;
-        if (!isWraparound && (nextX < 0 || nextX >= w || nextY < 0 || nextY >= h)) {
-          isBlocked = true;
-        } else if (effectiveGrid[nextY][nextX] === 'WALL' || effectiveGrid[nextY][nextX] === 'OBSTACLE') {
-          isBlocked = true;
-        } else {
-          const blocker = chipsRef.current.find(
-            (c) => c.id !== frontChip.id && c.x === nextX && c.y === nextY
-          );
-          if (blocker && blocker.level !== frontChip.level) {
-            isBlocked = true;
-          }
-        }
+        // Calculate the ground-truth physical trajectory
+        const pushPlan = calculatePush(effectiveGrid, chipsRef.current, frontChip, dir, isWraparound);
 
         // 2. Both hands push animation regardless of whether chip can slide!
         setIsPushing(true);
         setTimeout(() => setIsPushing(false), 240);
 
-        if (isBlocked) {
+        if (!pushPlan.canPush || !pushPlan.moved) {
           sounds.playBump();
           return;
         }
@@ -324,27 +309,84 @@ export default function App() {
         const startY = frontChip.y;
         const slideDir = dir;
 
-        // 1 lap distance D = width or height
-        const D = isWraparound
-          ? (dx !== 0 ? w : h)
-          : (dx !== 0 ? (dx > 0 ? w - 1 - startX : startX) : (dy > 0 ? h - 1 - startY : startY));
+        // Check if Einstein is in the path
+        const curP = playerPosRef.current;
+        const curD = playerDirRef.current;
+        const oppositeDir: Record<Direction, Direction> = {
+          UP: 'DOWN',
+          DOWN: 'UP',
+          LEFT: 'RIGHT',
+          RIGHT: 'LEFT',
+        };
 
-        // In wraparound: exactly 2 full laps (Lap 1 normal speed, Lap 2 friction deceleration)
-        const Smax = isWraparound ? 2 * D : D;
+        const traveledPath = pushPlan.traveledPath ?? [{ x: startX, y: startY }];
+        const destX = pushPlan.finalX ?? startX;
+        const destY = pushPlan.finalY ?? startY;
 
-        // Initial speed matching walking pace (5.5 tiles/sec)
+        let einsteinHitIdx = -1;
+        for (let i = 1; i < traveledPath.length; i++) {
+          if (traveledPath[i].x === curP.x && traveledPath[i].y === curP.y) {
+            einsteinHitIdx = i;
+            break;
+          }
+        }
+
+        let actionType: 'MERGE' | 'CATCH' | 'KNOCKOUT' | 'TWO_LAPS' | 'STOP';
+        let Smax: number;
+        let finalTileX: number;
+        let finalTileY: number;
+
+        const maxSteps = dx !== 0 ? w : h;
+        const isTwoLaps = isWraparound && traveledPath.length - 1 >= 2 * maxSteps;
+
+        if (einsteinHitIdx !== -1) {
+          if (curD === oppositeDir[slideDir]) {
+            // EINSTEIN FACES CHIP HEAD-ON: CATCH & BLOCK!
+            actionType = 'CATCH';
+            Smax = Math.max(0, einsteinHitIdx - 1);
+            finalTileX = traveledPath[Smax].x;
+            finalTileY = traveledPath[Smax].y;
+          } else {
+            // EINSTEIN CAUGHT OFF-GUARD: KNOCKOUT!
+            actionType = 'KNOCKOUT';
+            Smax = einsteinHitIdx;
+            finalTileX = curP.x;
+            finalTileY = curP.y;
+          }
+        } else if (pushPlan.merged) {
+          actionType = 'MERGE';
+          Smax = Math.max(1, traveledPath.length - 1);
+          finalTileX = destX;
+          finalTileY = destY;
+        } else if (isTwoLaps) {
+          actionType = 'TWO_LAPS';
+          Smax = 2 * maxSteps;
+          finalTileX = startX;
+          finalTileY = startY;
+        } else {
+          actionType = 'STOP';
+          Smax = Math.max(0, traveledPath.length - 1);
+          finalTileX = destX;
+          finalTileY = destY;
+        }
+
         const v0 = 5.5; // tiles/sec
-        // Time for Lap 1 (constant speed v0 over distance D):
-        const T1 = (D / v0) * 1000; // ms
-        // Time for Lap 2 (constant deceleration from v0 to 0 over distance D):
-        const T2 = ((2 * D) / v0) * 1000; // ms (= 2 * T1)
-        // Total duration for sliding:
-        const Ttotal = isWraparound ? T1 + T2 : (D / v0) * 1000;
+        let Ttotal: number;
+        let T1 = 0;
+        let T2 = 0;
+        const D = maxSteps;
+
+        if (actionType === 'TWO_LAPS') {
+          T1 = (D / v0) * 1000;
+          T2 = ((2 * D) / v0) * 1000;
+          Ttotal = T1 + T2;
+        } else {
+          Ttotal = Math.max(90, (Smax / v0) * 1000);
+        }
 
         const startTime = performance.now();
-        let lastCheckedTileIndex = 0;
 
-        const stopAndSnapChip = (finalTileX: number, finalTileY: number) => {
+        const stopAndSnapChip = (fx: number, fy: number) => {
           slidingChipIdRef.current = null;
           if (animFrameRef.current) {
             cancelAnimationFrame(animFrameRef.current);
@@ -353,12 +395,12 @@ export default function App() {
           setChips((prev) =>
             prev.map((c) =>
               c.id === chipId
-                ? { ...c, x: finalTileX, y: finalTileY, noTransition: false }
+                ? { ...c, x: fx, y: fy, noTransition: false }
                 : c
             )
           );
           chipsRef.current = chipsRef.current.map((c) =>
-            c.id === chipId ? { ...c, x: finalTileX, y: finalTileY, noTransition: false } : c
+            c.id === chipId ? { ...c, x: fx, y: fy, noTransition: false } : c
           );
         };
 
@@ -366,150 +408,88 @@ export default function App() {
           const elapsed = now - startTime;
           let s: number;
 
-          if (isWraparound) {
+          if (actionType === 'TWO_LAPS') {
             if (elapsed <= T1) {
-              // Lap 1: constant normal speed v0
               const p1 = Math.min(1.0, elapsed / T1);
               s = D * p1;
             } else {
-              // Lap 2: kinetic friction deceleration from v0 to 0 over distance D
               const elapsed2 = elapsed - T1;
               const p2 = Math.min(1.0, elapsed2 / T2);
               s = D + D * (2 * p2 - p2 * p2);
             }
           } else {
             const p = Math.min(1.0, elapsed / Ttotal);
-            s = D * p;
+            s = Smax * p;
           }
 
-          // Check collisions as leading edge enters new tiles
-          const currentTileIdx = Math.min(Smax, Math.floor(s + 0.5));
+          // Bound s strictly within [0, Smax] so it never overshoots obstacles
+          s = Math.min(Smax, Math.max(0, s));
 
-          while (lastCheckedTileIndex < currentTileIdx) {
-            const k = lastCheckedTileIndex + 1;
-            const tkX = isWraparound ? (((startX + dx * k) % w) + w) % w : startX + dx * k;
-            const tkY = isWraparound ? (((startY + dy * k) % h) + h) % h : startY + dy * k;
-            const prevX = isWraparound ? (((startX + dx * (k - 1)) % w) + w) % w : startX + dx * (k - 1);
-            const prevY = isWraparound ? (((startY + dy * (k - 1)) % h) + h) % h : startY + dy * (k - 1);
-
-            // 1. Wall or Obstacle Check
-            if (!isWraparound && (tkX < 0 || tkX >= w || tkY < 0 || tkY >= h)) {
-              stopAndSnapChip(prevX, prevY);
-              sounds.playBump();
-              return;
-            }
-            if (effectiveGrid[tkY][tkX] === 'WALL' || effectiveGrid[tkY][tkX] === 'OBSTACLE') {
-              stopAndSnapChip(prevX, prevY);
-              sounds.playBump();
-              return;
-            }
-
-            // 2. Collision with Other Chip
-            const other = chipsRef.current.find(
-              (c) => c.id !== chipId && c.x === tkX && c.y === tkY
-            );
-            if (other) {
-              const movingChip = chipsRef.current.find((c) => c.id === chipId);
-              if (movingChip && movingChip.level === other.level) {
-                // FUSION MERGE!
-                const newLevel = movingChip.level + 1;
-                slidingChipIdRef.current = null;
-                if (animFrameRef.current) {
-                  cancelAnimationFrame(animFrameRef.current);
-                  animFrameRef.current = null;
-                }
-                sounds.playMerge(newLevel);
-                setChips((prev) => {
-                  const nextChips = prev
-                    .filter((c) => c.id !== chipId)
-                    .map((c) =>
-                      c.id === other.id
-                        ? { ...c, level: newLevel, isMerging: true, noTransition: false }
-                        : c
-                    );
-                  chipsRef.current = nextChips;
-                  if (
-                    nextChips.length === 1 &&
-                    nextChips[0].level === currentLevel.targetLevel
-                  ) {
-                    setTimeout(() => {
-                      setIsVictory(true);
-                      sounds.playVictory();
-                    }, 200);
-                  }
-                  return nextChips;
-                });
-                setTimeout(() => {
-                  setChips((prev) =>
-                    prev.map((c) => (c.id === other.id ? { ...c, isMerging: false } : c))
-                  );
-                }, 300);
-                return;
-              } else {
-                // Stopped by different level chip in front of it
-                stopAndSnapChip(prevX, prevY);
-                sounds.playBump();
-                return;
-              }
-            }
-
-            // 3. Collision with Einstein!
-            const curP = playerPosRef.current;
-            const curD = playerDirRef.current;
-            if (curP.x === tkX && curP.y === tkY) {
-              const oppositeDir: Record<Direction, Direction> = {
-                UP: 'DOWN',
-                DOWN: 'UP',
-                LEFT: 'RIGHT',
-                RIGHT: 'LEFT',
-              };
-
-              if (curD === oppositeDir[slideDir]) {
-                // EINSTEIN FACES CHIP HEAD-ON: CATCH & BLOCK!
-                stopAndSnapChip(prevX, prevY);
-                setIsPushing(true);
-                sounds.playCatch();
-                setCatchMessage('✋ 成功防禦！博士及時轉身將迎面而來的晶片穩穩擋下！');
-                setTimeout(() => {
-                  setIsPushing(false);
-                  setCatchMessage(null);
-                }, 2200);
-                return;
-              } else {
-                // EINSTEIN CAUGHT OFF-GUARD: KNOCKOUT!
-                stopAndSnapChip(tkX, tkY);
-                setIsKnockedOut(true);
-                sounds.playKnockout();
-                return;
-              }
-            }
-
-            // Tile is clear, advance check index
-            lastCheckedTileIndex = k;
-          }
-
-          // 4. If full sliding completed (elapsed >= Ttotal or s >= Smax)
+          // If reached final destination
           if (elapsed >= Ttotal || s >= Smax) {
-            // Friction smoothly brought chip to rest right back at start position!
-            stopAndSnapChip(startX, startY);
-            sounds.playBump();
-            return;
+            if (actionType === 'MERGE') {
+              const newLevel = frontChip.level + 1;
+              slidingChipIdRef.current = null;
+              if (animFrameRef.current) {
+                cancelAnimationFrame(animFrameRef.current);
+                animFrameRef.current = null;
+              }
+              sounds.playMerge(newLevel);
+              setChips((prev) => {
+                const nextChips = prev
+                  .filter((c) => c.id !== chipId)
+                  .map((c) =>
+                    c.id === pushPlan.targetChipId
+                      ? { ...c, level: newLevel, isMerging: true, noTransition: false }
+                      : c
+                  );
+                chipsRef.current = nextChips;
+                if (
+                  nextChips.length === 1 &&
+                  nextChips[0].level === currentLevel.targetLevel
+                ) {
+                  setTimeout(() => {
+                    setIsVictory(true);
+                    sounds.playVictory();
+                  }, 200);
+                }
+                return nextChips;
+              });
+              setTimeout(() => {
+                setChips((prev) =>
+                  prev.map((c) => (c.id === pushPlan.targetChipId ? { ...c, isMerging: false } : c))
+                );
+              }, 300);
+              return;
+            } else if (actionType === 'CATCH') {
+              stopAndSnapChip(finalTileX, finalTileY);
+              setIsPushing(true);
+              sounds.playCatch();
+              setCatchMessage('✋ 成功防禦！博士及時轉身將迎面而來的晶片穩穩擋下！');
+              setTimeout(() => {
+                setIsPushing(false);
+                setCatchMessage(null);
+              }, 2200);
+              return;
+            } else if (actionType === 'KNOCKOUT') {
+              stopAndSnapChip(finalTileX, finalTileY);
+              setIsKnockedOut(true);
+              sounds.playKnockout();
+              return;
+            } else {
+              // STOP or TWO_LAPS
+              stopAndSnapChip(finalTileX, finalTileY);
+              sounds.playBump();
+              return;
+            }
           }
 
-          // 5. Continuous Sub-Pixel Visual Coordinate Calculation
+          // Continuous Sub-Pixel Visual Coordinate Calculation
           const rawX = startX + dx * s;
           const rawY = startY + dy * s;
 
-          let renderX: number;
-          let renderY: number;
-
-          if (isWraparound) {
-            renderX = ((rawX % w) + w) % w;
-            renderY = ((rawY % h) + h) % h;
-          } else {
-            renderX = rawX;
-            renderY = rawY;
-          }
+          const renderX = isWraparound ? ((rawX % w) + w) % w : rawX;
+          const renderY = isWraparound ? ((rawY % h) + h) % h : rawY;
 
           // Update position at 60fps without CSS transition
           setChips((prev) =>
@@ -520,7 +500,6 @@ export default function App() {
             )
           );
 
-          // Request next frame
           animFrameRef.current = requestAnimationFrame(updatePhysicsFrame);
         };
 
