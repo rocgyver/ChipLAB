@@ -168,22 +168,22 @@ export const ChipCard: React.FC<ChipCardProps> = ({
         )}
       </div>
 
-      {/* Push Directional Arrows: Flashing Pale Pink Arrow */}
+      {/* Push Directional Arrows: Flashing Pale Pink Bold Arrow with Stem (↑, ↓, ←, →) */}
       {pushableDirections.map((dir) => {
         let posClass = '';
-        let arrowIcon = '▶';
+        let svgPath = '';
         if (dir === 'UP') {
           posClass = '-top-3 left-1/2 -translate-x-1/2';
-          arrowIcon = '▲';
+          svgPath = 'M8 2 L13.5 7.5 L10 7.5 L10 14 L6 14 L6 7.5 L2.5 7.5 Z';
         } else if (dir === 'DOWN') {
           posClass = '-bottom-3 left-1/2 -translate-x-1/2';
-          arrowIcon = '▼';
+          svgPath = 'M8 14 L2.5 8.5 L6 8.5 L6 2 L10 2 L10 8.5 L13.5 8.5 Z';
         } else if (dir === 'LEFT') {
           posClass = '-left-3 top-1/2 -translate-y-1/2';
-          arrowIcon = '◀';
+          svgPath = 'M2 8 L7.5 2.5 L7.5 6 L14 6 L14 10 L7.5 10 L7.5 13.5 Z';
         } else if (dir === 'RIGHT') {
           posClass = '-right-3 top-1/2 -translate-y-1/2';
-          arrowIcon = '▶';
+          svgPath = 'M14 8 L8.5 2.5 L8.5 6 L2 6 L2 10 L8.5 10 L8.5 13.5 Z';
         }
 
         return (
@@ -195,9 +195,11 @@ export const ChipCard: React.FC<ChipCardProps> = ({
               onDirectPush?.(dir);
             }}
             title={`向${dir === 'UP' ? '上' : dir === 'DOWN' ? '下' : dir === 'LEFT' ? '左' : '右'}推動`}
-            className={`absolute ${posClass} z-30 w-4 h-4 rounded-none bg-pink-300 hover:bg-pink-200 text-pink-950 font-black text-[9px] flex items-center justify-center shadow-[0_0_8px_rgba(244,114,182,0.7)] animate-pulse cursor-pointer border border-pink-100 transition-transform hover:scale-125`}
+            className={`absolute ${posClass} z-30 w-4.5 h-4.5 rounded-none bg-pink-300 hover:bg-pink-200 text-pink-950 flex items-center justify-center shadow-[0_0_8px_rgba(244,114,182,0.7)] animate-pulse cursor-pointer border border-pink-100 transition-transform hover:scale-125`}
           >
-            {arrowIcon}
+            <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current pointer-events-none">
+              <path d={svgPath} />
+            </svg>
           </button>
         );
       })}
