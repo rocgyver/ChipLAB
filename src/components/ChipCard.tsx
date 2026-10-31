@@ -173,16 +173,16 @@ export const ChipCard: React.FC<ChipCardProps> = ({
         let posClass = '';
         let svgPath = '';
         if (dir === 'UP') {
-          posClass = '-top-3.5 left-1/2 -translate-x-1/2';
+          posClass = '-top-2.5 left-1/2 -translate-x-1/2';
           svgPath = 'M8 2 L13.5 7.5 L10 7.5 L10 14 L6 14 L6 7.5 L2.5 7.5 Z';
         } else if (dir === 'DOWN') {
-          posClass = '-bottom-3.5 left-1/2 -translate-x-1/2';
+          posClass = '-bottom-2.5 left-1/2 -translate-x-1/2';
           svgPath = 'M8 14 L2.5 8.5 L6 8.5 L6 2 L10 2 L10 8.5 L13.5 8.5 Z';
         } else if (dir === 'LEFT') {
-          posClass = '-left-3.5 top-1/2 -translate-y-1/2';
+          posClass = '-left-2.5 top-1/2 -translate-y-1/2';
           svgPath = 'M2 8 L7.5 2.5 L7.5 6 L14 6 L14 10 L7.5 10 L7.5 13.5 Z';
         } else if (dir === 'RIGHT') {
-          posClass = '-right-3.5 top-1/2 -translate-y-1/2';
+          posClass = '-right-2.5 top-1/2 -translate-y-1/2';
           svgPath = 'M14 8 L8.5 2.5 L8.5 6 L2 6 L2 10 L8.5 10 L8.5 13.5 Z';
         }
 
