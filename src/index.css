@@ -53,4 +53,27 @@
   animation: pulseOpposite 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Forward traveling wave for laser trajectory dots: sequentially lighting up forward */
+@keyframes trajectoryFlow {
+  0% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.75);
+    filter: drop-shadow(0 0 1px rgba(244, 114, 182, 0.3));
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.4);
+    filter: drop-shadow(0 0 8px rgba(244, 114, 182, 1));
+  }
+  60%, 100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.75);
+    filter: drop-shadow(0 0 1px rgba(244, 114, 182, 0.3));
+  }
+}
+
+.animate-trajectory-flow {
+  animation: trajectoryFlow 1s ease-in-out infinite both;
+}
+
 

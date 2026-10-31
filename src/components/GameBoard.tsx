@@ -170,7 +170,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           })
         )}
 
-        {/* Laser Slide Trajectory Preview: Pink dots, half-size, opposite breathing rhythm */}
+        {/* Laser Slide Trajectory Preview: Pink dots, half-size, sequentially lighting up forward */}
         {laserTrajectory && (
           <div className="absolute inset-0 pointer-events-none z-15">
             {laserTrajectory.path.slice(1).map((pt, idx) => {
@@ -180,14 +180,15 @@ export const GameBoard: React.FC<GameBoardProps> = ({
               return (
                 <div
                   key={`laser-dot-${idx}`}
-                  className={`absolute rounded-full animate-pulse-opposite ${
+                  className={`absolute rounded-full animate-trajectory-flow ${
                     isCollisionEnd
-                      ? 'w-2 h-2 bg-pink-200 shadow-[0_0_8px_rgba(244,114,182,1)]'
+                      ? 'w-2 h-2 bg-pink-200 shadow-[0_0_8px_rgba(244,114,182,1)] ring-1 ring-pink-300'
                       : 'w-1 h-1 bg-pink-300 shadow-[0_0_6px_rgba(244,114,182,0.9)]'
                   }`}
                   style={{
                     left: `${((pt.x + 0.5) / width) * 100}%`,
                     top: `${((pt.y + 0.5) / height) * 100}%`,
+                    animationDelay: `${idx * 0.12}s`,
                   }}
                 />
               );
