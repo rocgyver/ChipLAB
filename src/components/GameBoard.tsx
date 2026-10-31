@@ -170,7 +170,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           })
         )}
 
-        {/* Laser Slide Trajectory Preview: Pink dots, half-size, sequentially lighting up forward */}
+        {/* Laser Slide Trajectory Preview: Pink dots, ultra-fine size, sequentially lighting up forward */}
         {laserTrajectory && (
           <div className="absolute inset-0 pointer-events-none z-15">
             {laserTrajectory.path.slice(1).map((pt, idx) => {
@@ -182,8 +182,8 @@ export const GameBoard: React.FC<GameBoardProps> = ({
                   key={`laser-dot-${idx}`}
                   className={`absolute rounded-full animate-trajectory-flow ${
                     isCollisionEnd
-                      ? 'w-2 h-2 bg-pink-200 shadow-[0_0_8px_rgba(244,114,182,1)] ring-1 ring-pink-300'
-                      : 'w-1 h-1 bg-pink-300 shadow-[0_0_6px_rgba(244,114,182,0.9)]'
+                      ? 'w-1 h-1 bg-pink-200 shadow-[0_0_5px_rgba(244,114,182,1)] ring-1 ring-pink-300/80'
+                      : 'w-0.5 h-0.5 bg-pink-300 shadow-[0_0_3px_rgba(244,114,182,0.9)]'
                   }`}
                   style={{
                     left: `${((pt.x + 0.5) / width) * 100}%`,
@@ -242,9 +242,14 @@ export const GameBoard: React.FC<GameBoardProps> = ({
           );
         })}
 
-        {/* Einstein Scientist Sprite Layer */}
+        {/* Einstein Scientist Sprite Layer: Clicking stationary doctor turns him 90 degrees left */}
         <div
-          className={`absolute z-25 pointer-events-none ${
+          onClick={(e) => {
+            e.stopPropagation();
+            onTileClick(playerPos.x, playerPos.y);
+          }}
+          title="點擊博士向左轉 90 度"
+          className={`absolute z-25 cursor-pointer touch-manipulation select-none ${
             isPlayerNoTransition
               ? 'transition-none'
               : 'transition-all duration-120 ease-out'

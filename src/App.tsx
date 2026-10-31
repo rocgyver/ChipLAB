@@ -696,6 +696,24 @@ export default function App() {
     (tx: number, ty: number) => {
       if (isBusyRef.current || isVictory || isTimeOver || isKnockedOut) return;
 
+      // Clicking stationary Einstein turns him 90 degrees to the left
+      if (tx === playerPos.x && ty === playerPos.y) {
+        if (!isWalking && !isPushing) {
+          const turnLeftMap: Record<Direction, Direction> = {
+            UP: 'LEFT',
+            LEFT: 'DOWN',
+            DOWN: 'RIGHT',
+            RIGHT: 'UP',
+          };
+          const currentDir = playerDirRef.current || playerDir;
+          const nextDir = turnLeftMap[currentDir];
+          setPlayerDir(nextDir);
+          playerDirRef.current = nextDir;
+          sounds.playStep();
+        }
+        return;
+      }
+
       const w = currentLevel.width;
       const h = currentLevel.height;
 
@@ -800,7 +818,7 @@ export default function App() {
         stepIndex++;
       }, 85);
     },
-    [chips, currentLevel.height, currentLevel.width, effectiveGrid, handleMove, isTimeOver, isVictory, isWraparound, playerPos]
+    [chips, currentLevel.height, currentLevel.width, effectiveGrid, handleMove, isTimeOver, isVictory, isKnockedOut, isWraparound, playerPos, playerDir, isWalking, isPushing]
   );
 
   // Keyboard navigation
