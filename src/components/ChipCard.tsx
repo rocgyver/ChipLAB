@@ -26,47 +26,9 @@ export const ChipCard: React.FC<ChipCardProps> = ({
   const isSupercomputer = level === 8;
   const isQuantum = level === 7;
 
-  // Render compact view (number-only mode with authentic IC pins & notch)
-  const renderCompactView = () => (
-    <div className="relative w-full h-full flex flex-col items-center justify-between overflow-hidden">
-      {/* Top Header: Pin-1 Index Notch */}
-      <div className="w-full flex items-center justify-center pt-0 z-10">
-        <div className="w-1.5 h-0.5 bg-slate-950 border-b border-l border-r border-slate-700 -mt-0.5 opacity-90" />
-      </div>
-
-      {/* Dual-in-line Pins on Left & Right (2 pins per side for ultra-compact scaling) */}
-      <div className="absolute left-0 top-1 bottom-1 flex flex-col justify-around py-0.5 pointer-events-none">
-        {[0, 1].map((i) => (
-          <div
-            key={`c-pin-l-${i}`}
-            className="w-0.5 h-1 -ml-0.5 rounded-none bg-gradient-to-r from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-xs"
-          />
-        ))}
-      </div>
-      <div className="absolute right-0 top-1 bottom-1 flex flex-col justify-around py-0.5 pointer-events-none">
-        {[0, 1].map((i) => (
-          <div
-            key={`c-pin-r-${i}`}
-            className="w-0.5 h-1 -mr-0.5 rounded-none bg-gradient-to-l from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-xs"
-          />
-        ))}
-      </div>
-
-      {/* Center Bold Number */}
-      <div className="flex-1 flex items-center justify-center text-center w-full h-full z-10 leading-none px-1">
-        <span
-          className="font-black font-mono leading-none tracking-tighter select-none"
-          style={{
-            color: def.borderColor,
-            textShadow: `0 0 6px ${def.glowColor}`,
-            fontSize: 'clamp(10px, 48cqw, 20px)',
-          }}
-        >
-          {isSupercomputer ? '8★' : level}
-        </span>
-      </div>
-    </div>
-  );
+  // Number of pins per side: 2 pins for small/compact chips, 4 pins for normal/large chips
+  const pinCount = numberOnly || size === 'compact' ? 2 : 4;
+  const pinIndices = Array.from({ length: pinCount }, (_, i) => i);
 
   return (
     <div
@@ -74,9 +36,19 @@ export const ChipCard: React.FC<ChipCardProps> = ({
         isMerging ? 'scale-110 transition-transform duration-150' : ''
       }`}
     >
-      {/* Outer Chip Casing: Straight rectangular IC package (no rounded corners) */}
+      {/* 2. 左右兩排外伸針腳 (Left Leadframe Pins extending outwards) */}
+      <div className="absolute left-0 top-[15%] bottom-[15%] w-[8%] flex flex-col justify-evenly items-start pointer-events-none z-10">
+        {pinIndices.map((i) => (
+          <div
+            key={`pin-l-${i}`}
+            className="w-full h-1 sm:h-1.5 rounded-none bg-gradient-to-r from-slate-300 via-amber-200 to-slate-400 border-t border-b border-l border-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+          />
+        ))}
+      </div>
+
+      {/* Main Epoxy Chip Casing: Straight rectangular IC package (84% width to leave space for outer pins) */}
       <div
-        className={`relative w-full h-full rounded-none shadow-lg border flex flex-col items-center justify-between overflow-hidden transition-all duration-150 ${
+        className={`relative w-[84%] h-full rounded-none shadow-lg border flex flex-col items-center justify-between overflow-hidden transition-all duration-150 z-10 ${
           isSupercomputer
             ? 'animate-pulse ring-2 ring-yellow-400 ring-offset-1 ring-offset-black'
             : isQuantum
@@ -89,41 +61,44 @@ export const ChipCard: React.FC<ChipCardProps> = ({
           boxShadow: `0 4px 12px ${def.glowColor}, inset 0 1px 1px rgba(255,255,255,0.2)`,
         }}
       >
-        {/* If numberOnly: Force compact view with pins and notch */}
+        {/* 1. 上方定位凹槽：頂部專屬的 Pin-1 方正定位凹槽 */}
+        <div
+          title="Pin-1 Index Notch"
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-2.5 sm:w-3.5 h-1 sm:h-1.5 bg-slate-950 border-b border-x border-slate-700/90 shadow-[inset_0_1px_2px_rgba(0,0,0,0.9)] z-20"
+        />
+
+        {/* If numberOnly or compact space: Render ONLY the centered bold number */}
         {numberOnly ? (
-          renderCompactView()
+          <div className="flex-1 flex items-center justify-center text-center w-full h-full z-10 pt-1">
+            <span
+              className="font-black font-mono leading-none tracking-tighter select-none"
+              style={{
+                color: def.borderColor,
+                textShadow: `0 0 6px ${def.glowColor}`,
+                fontSize: 'clamp(10px, 48cqw, 20px)',
+              }}
+            >
+              {isSupercomputer ? '8★' : level}
+            </span>
+          </div>
         ) : (
           <>
-            {/* Auto-responsive: On very small containers (<46px), show compact view */}
-            <div className="flex @[46px]:hidden w-full h-full">
-              {renderCompactView()}
+            {/* Auto-responsive: On very small containers (<46px), show number-only */}
+            <div className="flex @[46px]:hidden flex-1 items-center justify-center text-center w-full h-full z-10 pt-1">
+              <span
+                className="font-black font-mono leading-none tracking-tighter select-none"
+                style={{
+                  color: def.borderColor,
+                  textShadow: `0 0 6px ${def.glowColor}`,
+                  fontSize: 'clamp(10px, 48cqw, 20px)',
+                }}
+              >
+                {isSupercomputer ? '8★' : level}
+              </span>
             </div>
 
             {/* Detailed IC Silkscreen view: only visible when space permits (>=46px) */}
-            <div className="hidden @[46px]:flex flex-col w-full h-full justify-between items-center relative">
-              {/* Dual-in-line Pins on Left & Right */}
-              <div className="absolute left-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
-                {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
-                  <div
-                    key={`pin-l-${i}`}
-                    className="w-1 h-1.5 -ml-0.5 rounded-none bg-gradient-to-r from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
-                  />
-                ))}
-              </div>
-              <div className="absolute right-0 top-1 bottom-1 flex flex-col justify-between py-1 pointer-events-none">
-                {[...Array(size === 'compact' ? 3 : 4)].map((_, i) => (
-                  <div
-                    key={`pin-r-${i}`}
-                    className="w-1 h-1.5 -mr-0.5 rounded-none bg-gradient-to-l from-slate-300 to-amber-200 border-t border-b border-slate-700 shadow-sm"
-                  />
-                ))}
-              </div>
-
-              {/* Top Header of Chip: Pin-1 Index Notch */}
-              <div className="w-full flex items-center justify-between px-1.5 pt-0.5 z-10">
-                <div className="w-2 h-1 bg-slate-900 border-b border-l border-r border-slate-700 mx-auto -mt-0.5 opacity-80" />
-              </div>
-
+            <div className="hidden @[46px]:flex flex-col w-full h-full justify-between items-center relative pt-1.5 pb-0.5">
               {/* Chip Body Core */}
               <div className="flex-1 flex flex-col items-center justify-center text-center px-0.5 z-10 w-full min-h-0 overflow-hidden">
                 {/* Level Badge */}
@@ -166,6 +141,16 @@ export const ChipCard: React.FC<ChipCardProps> = ({
             style={{ animationDuration: '0.4s' }}
           />
         )}
+      </div>
+
+      {/* 2. 左右兩排外伸針腳 (Right Leadframe Pins extending outwards) */}
+      <div className="absolute right-0 top-[15%] bottom-[15%] w-[8%] flex flex-col justify-evenly items-end pointer-events-none z-10">
+        {pinIndices.map((i) => (
+          <div
+            key={`pin-r-${i}`}
+            className="w-full h-1 sm:h-1.5 rounded-none bg-gradient-to-l from-slate-300 via-amber-200 to-slate-400 border-t border-b border-r border-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
+          />
+        ))}
       </div>
 
       {/* Push Directional Arrows: Flashing Pale Pink Bold Arrow with Stem (↑, ↓, ←, →) */}
